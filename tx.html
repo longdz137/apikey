@@ -146,6 +146,11 @@
             background-color: #eaf2f8;
             border-radius: 5px;
         }
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -168,6 +173,7 @@ Tài
 Xỉu
 Tài
 Tài"></textarea>
+            <div id="input-error" class="error"></div>
         </div>
         
         <div class="input-section">
@@ -180,100 +186,135 @@ Tài"></textarea>
             </select>
         </div>
         
-        <button onclick="analyzeData()">PHÂN TÍCH & DỰ ĐOÁN</button>
+        <button id="analyze-btn">PHÂN TÍCH & DỰ ĐOÁN</button>
         
         <div id="result" class="result">
-            <h2>📊 Kết Quả Phân Tích Chuyên Sâu</h2>
-            
-            <div class="stats">
-                <div class="stat-box">
-                    <div>Tổng phiên</div>
-                    <div class="stat-value" id="total-rounds">0</div>
-                </div>
-                <div class="stat-box">
-                    <div>Tài</div>
-                    <div class="stat-value" id="tai-count">0</div>
-                    <div id="tai-percent">0%</div>
-                </div>
-                <div class="stat-box">
-                    <div>Xỉu</div>
-                    <div class="stat-value" id="xiu-count">0</div>
-                    <div id="xiu-percent">0%</div>
-                </div>
-                <div class="stat-box">
-                    <div>Xu hướng</div>
-                    <div class="stat-value" id="trend">-</div>
-                    <div class="trend-indicator" id="trend-indicator"></div>
-                </div>
-            </div>
-            
-            <div class="analysis-section">
-                <h3>📈 Biểu Đồ Xu Hướng</h3>
-                <div id="trend-analysis"></div>
-                <div id="pattern-analysis" class="pattern"></div>
-            </div>
-            
-            <div class="analysis-section">
-                <h3>🧩 Mẫu Chuỗi Phổ Biến</h3>
-                <div id="common-patterns"></div>
-            </div>
-            
-            <div class="prediction">
-                <h3>🔮 Dự Đoán Phiên Tiếp Theo</h3>
-                <div id="next-prediction" style="font-size: 24px; font-weight: bold;">-</div>
-                <div id="confidence" style="margin-top: 10px;"></div>
-            </div>
-            
-            <div class="analysis-section">
-                <h3>📋 Lịch Sử Phiên</h3>
-                <div class="history-grid" id="history-display"></div>
-            </div>
+            <!-- Kết quả sẽ được hiển thị ở đây -->
         </div>
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Thêm sự kiện click cho nút phân tích
+            document.getElementById('analyze-btn').addEventListener('click', analyzeData);
+        });
+
         function analyzeData() {
+            // Reset thông báo lỗi
+            document.getElementById('input-error').textContent = '';
+            
             // Lấy dữ liệu đầu vào
             const roundIdsInput = document.getElementById('round-ids').value;
             const resultsInput = document.getElementById('results').value;
             const analysisType = document.getElementById('analysis-type').value;
             
+            // Kiểm tra dữ liệu đầu vào
+            if (!resultsInput.trim()) {
+                document.getElementById('input-error').textContent = 'Vui lòng nhập kết quả Tài/Xỉu';
+                return;
+            }
+            
             // Xử lý dữ liệu
             const roundIds = roundIdsInput.split(/[\n,]+/).map(id => id.trim()).filter(id => id !== '');
-            const results = resultsInput.split(/[\n,]+/).map(res => res.trim().toLowerCase()).filter(res => res === 'tài' || res === 'xỉu');
+            const results = resultsInput.split(/[\n,]+/).map(res => res.trim().toLowerCase()).filter(res => res !== '');
             
-            // Hiển thị lịch sử
-            const historyDisplay = document.getElementById('history-display');
-            historyDisplay.innerHTML = '';
+            // Kiểm tra kết quả hợp lệ
+            const invalidResults = results.filter(res => res !== 'tài' && res !== 'xỉu');
+            if (invalidResults.length > 0) {
+                document.getElementById('input-error').textContent = `Có kết quả không hợp lệ: ${invalidResults.join(', ')}. Chỉ chấp nhận "Tài" hoặc "Xỉu".`;
+                return;
+            }
+            
+            // Tạo nội dung kết quả
+            let resultHTML = `
+                <h2>📊 Kết Quả Phân Tích Chuyên Sâu</h2>
+                
+                <div class="stats">
+                    <div class="stat-box">
+                        <div>Tổng phiên</div>
+                        <div class="stat-value" id="total-rounds">${results.length}</div>
+                    </div>
+            `;
             
             // Thống kê cơ bản
-            let taiCount = 0;
-            let xiuCount = 0;
-            let last5Results = [];
+            const taiCount = results.filter(r => r === 'tài').length;
+            const xiuCount = results.filter(r => r === 'xỉu').length;
+            const taiPercent = results.length > 0 ? Math.round(taiCount / results.length * 100) : 0;
+            const xiuPercent = results.length > 0 ? Math.round(xiuCount / results.length * 100) : 0;
+            
+            resultHTML += `
+                    <div class="stat-box">
+                        <div>Tài</div>
+                        <div class="stat-value">${taiCount}</div>
+                        <div>${taiPercent}%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div>Xỉu</div>
+                        <div class="stat-value">${xiuCount}</div>
+                        <div>${xiuPercent}%</div>
+                    </div>
+            `;
+            
+            // Phân tích xu hướng
+            let trend = "Ổn định";
+            let trendIndicator = "";
+            if (results.length >= 3) {
+                const last3 = results.slice(-3);
+                const taiLast3 = last3.filter(r => r === 'tài').length;
+                const xiuLast3 = last3.filter(r => r === 'xỉu').length;
+                
+                if (taiLast3 === 3) {
+                    trend = "Tài mạnh";
+                    trendIndicator = "🔥 Tài đang nóng";
+                } else if (xiuLast3 === 3) {
+                    trend = "Xỉu mạnh";
+                    trendIndicator = "❄️ Xỉu đang lạnh";
+                } else if (taiLast3 >= 2) {
+                    trend = "Tài nhẹ";
+                    trendIndicator = "↗️ Tài đang lên";
+                } else if (xiuLast3 >= 2) {
+                    trend = "Xỉu nhẹ";
+                    trendIndicator = "↘️ Xỉu đang xuống";
+                }
+            }
+            
+            resultHTML += `
+                    <div class="stat-box">
+                        <div>Xu hướng</div>
+                        <div class="stat-value">${trend}</div>
+                        <div class="trend-indicator ${trendIndicator.includes("nóng") || trendIndicator.includes("lạnh") ? 'hot' : ''}">${trendIndicator}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Hiển thị lịch sử
+            resultHTML += `
+                <div class="analysis-section">
+                    <h3>📋 Lịch Sử Phiên</h3>
+                    <div class="history-grid" id="history-display">
+            `;
+            
+            results.forEach((result, index) => {
+                const roundId = index < roundIds.length ? roundIds[index] : (index + 1);
+                resultHTML += `
+                    <div class="history-item ${result === 'tài' ? 'tai' : 'xiu'}" title="Phiên ${roundId}: ${result === 'tài' ? 'Tài' : 'Xỉu'}">
+                        ${result === 'tài' ? 'T' : 'X'}
+                    </div>
+                `;
+            });
+            
+            resultHTML += `
+                    </div>
+                </div>
+            `;
+            
+            // Phân tích mẫu chuỗi
             let sequences = [];
             let currentSequence = [];
             
-            // Xử lý từng kết quả
             for (let i = 0; i < results.length; i++) {
                 const result = results[i];
-                const roundId = i < roundIds.length ? roundIds[i] : (i + 1);
                 
-                // Thêm vào lịch sử hiển thị
-                const item = document.createElement('div');
-                item.className = `history-item ${result === 'tài' ? 'tai' : 'xiu'}`;
-                item.textContent = result === 'tài' ? 'T' : 'X';
-                item.title = `Phiên ${roundId}: ${result === 'tài' ? 'Tài' : 'Xỉu'}`;
-                historyDisplay.appendChild(item);
-                
-                // Thống kê
-                if (result === 'tài') taiCount++;
-                else xiuCount++;
-                
-                // Lưu 5 kết quả gần nhất
-                if (last5Results.length >= 5) last5Results.shift();
-                last5Results.push(result);
-                
-                // Phân tích chuỗi
                 if (currentSequence.length === 0 || currentSequence[currentSequence.length - 1] === result) {
                     currentSequence.push(result);
                 } else {
@@ -295,84 +336,44 @@ Tài"></textarea>
                 });
             }
             
-            const total = results.length;
-            const taiPercent = total > 0 ? Math.round(taiCount / total * 100) : 0;
-            const xiuPercent = total > 0 ? Math.round(xiuCount / total * 100) : 0;
-            
-            // Cập nhật thống kê
-            document.getElementById('total-rounds').textContent = total;
-            document.getElementById('tai-count').textContent = taiCount;
-            document.getElementById('xiu-count').textContent = xiuCount;
-            document.getElementById('tai-percent').textContent = `${taiPercent}%`;
-            document.getElementById('xiu-percent').textContent = `${xiuPercent}%`;
-            
-            // Phân tích xu hướng
-            let trend = "Ổn định";
-            let trendIndicator = "";
-            if (total >= 3) {
-                const last3 = results.slice(-3);
-                const taiLast3 = last3.filter(r => r === 'tài').length;
-                const xiuLast3 = last3.filter(r => r === 'xỉu').length;
-                
-                if (taiLast3 === 3) {
-                    trend = "Tài mạnh";
-                    trendIndicator = "🔥 Tài đang nóng";
-                } else if (xiuLast3 === 3) {
-                    trend = "Xỉu mạnh";
-                    trendIndicator = "❄️ Xỉu đang lạnh";
-                } else if (taiLast3 >= 2) {
-                    trend = "Tài nhẹ";
-                    trendIndicator = "↗️ Tài đang lên";
-                } else if (xiuLast3 >= 2) {
-                    trend = "Xỉu nhẹ";
-                    trendIndicator = "↘️ Xỉu đang xuống";
-                }
-            }
-            
-            document.getElementById('trend').textContent = trend;
-            const trendIndicatorEl = document.getElementById('trend-indicator');
-            trendIndicatorEl.textContent = trendIndicator;
-            if (trendIndicator.includes("nóng") || trendIndicator.includes("lạnh")) {
-                trendIndicatorEl.classList.add('hot');
-            } else {
-                trendIndicatorEl.classList.remove('hot');
-            }
-            
-            // Phân tích mẫu chuỗi
-            const patternAnalysis = document.getElementById('pattern-analysis');
-            patternAnalysis.innerHTML = '';
+            resultHTML += `
+                <div class="analysis-section">
+                    <h3>🧩 Mẫu Chuỗi Phổ Biến</h3>
+            `;
             
             if (sequences.length > 0) {
                 const longestSequence = sequences.reduce((max, seq) => seq.length > max.length ? seq : max, sequences[0]);
-                patternAnalysis.innerHTML += `<p>Chuỗi dài nhất: ${longestSequence.length} lần ${longestSequence.type === 'tài' ? 'Tài' : 'Xỉu'} liên tiếp</p>`;
+                resultHTML += `<p>Chuỗi dài nhất: ${longestSequence.length} lần ${longestSequence.type === 'tài' ? 'Tài' : 'Xỉu'} liên tiếp</p>`;
                 
                 const taiSequences = sequences.filter(seq => seq.type === 'tài');
                 const xiuSequences = sequences.filter(seq => seq.type === 'xỉu');
                 
                 if (taiSequences.length > 0) {
                     const avgTaiSeq = Math.round(taiSequences.reduce((sum, seq) => sum + seq.length, 0) / taiSequences.length * 10) / 10;
-                    patternAnalysis.innerHTML += `<p>Trung bình chuỗi Tài: ${avgTaiSeq} phiên</p>`;
+                    resultHTML += `<p>Trung bình chuỗi Tài: ${avgTaiSeq} phiên</p>`;
                 }
                 
                 if (xiuSequences.length > 0) {
                     const avgXiuSeq = Math.round(xiuSequences.reduce((sum, seq) => sum + seq.length, 0) / xiuSequences.length * 10) / 10;
-                    patternAnalysis.innerHTML += `<p>Trung bình chuỗi Xỉu: ${avgXiuSeq} phiên</p>`;
+                    resultHTML += `<p>Trung bình chuỗi Xỉu: ${avgXiuSeq} phiên</p>`;
                 }
+            } else {
+                resultHTML += `<p>Không tìm thấy chuỗi dài nào</p>`;
             }
             
-            // Dự đoán
-            const predictionEl = document.getElementById('next-prediction');
-            const confidenceEl = document.getElementById('confidence');
+            resultHTML += `</div>`;
             
-            if (total < 3) {
-                predictionEl.textContent = "Cần ít nhất 3 phiên để dự đoán";
-                confidenceEl.textContent = "";
+            // Dự đoán
+            resultHTML += `
+                <div class="prediction">
+                    <h3>🔮 Dự Đoán Phiên Tiếp Theo</h3>
+                    <div id="next-prediction" style="font-size: 24px; font-weight: bold;">
+            `;
+            
+            if (results.length < 3) {
+                resultHTML += "Cần ít nhất 3 phiên để dự đoán";
             } else {
-                let prediction = "";
-                let confidence = "";
                 let predictionScore = 0;
-                
-                // Phân tích dựa trên nhiều yếu tố
                 const lastResult = results[results.length - 1];
                 const secondLastResult = results[results.length - 2];
                 
@@ -389,30 +390,31 @@ Tài"></textarea>
                 
                 // 3. Mẫu lặp lại
                 if (lastResult === secondLastResult) {
-                    // Nếu đã lặp 2 lần, dự đoán đổi
                     predictionScore += lastResult === 'tài' ? -1 : 1;
                 }
                 
                 // Đưa ra dự đoán
                 if (predictionScore > 0) {
-                    prediction = "TÀI";
-                    confidence = `Độ tin cậy: ${Math.min(90, Math.max(60, Math.round(taiPercent + (predictionScore * 5))))}%`;
-                    predictionEl.style.color = "#27ae60";
+                    resultHTML += "TÀI";
+                    const confidence = Math.min(90, Math.max(60, Math.round(taiPercent + (predictionScore * 5)));
+                    resultHTML += `</div><div>Độ tin cậy: ${confidence}%</div>`;
+                    document.getElementById('next-prediction').style.color = "#27ae60";
                 } else if (predictionScore < 0) {
-                    prediction = "XỈU";
-                    confidence = `Độ tin cậy: ${Math.min(90, Math.max(60, Math.round(xiuPercent + (Math.abs(predictionScore) * 5)))}%`;
-                    predictionEl.style.color = "#e74c3c";
+                    resultHTML += "XỈU";
+                    const confidence = Math.min(90, Math.max(60, Math.round(xiuPercent + (Math.abs(predictionScore) * 5))));
+                    resultHTML += `</div><div>Độ tin cậy: ${confidence}%</div>`;
+                    document.getElementById('next-prediction').style.color = "#e74c3c";
                 } else {
-                    prediction = "KHÔNG RÕ";
-                    confidence = "Không có đủ dữ liệu để dự đoán chính xác";
-                    predictionEl.style.color = "#7f8c8d";
+                    resultHTML += "KHÔNG RÕ";
+                    resultHTML += `</div><div>Không có đủ dữ liệu để dự đoán chính xác</div>`;
+                    document.getElementById('next-prediction').style.color = "#7f8c8d";
                 }
-                
-                predictionEl.textContent = prediction;
-                confidenceEl.textContent = confidence;
             }
             
+            resultHTML += `</div>`;
+            
             // Hiển thị kết quả
+            document.getElementById('result').innerHTML = resultHTML;
             document.getElementById('result').style.display = 'block';
         }
     </script>
