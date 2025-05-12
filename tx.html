@@ -3,420 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công Cụ Phân Tích Tài Xỉu SunWin Pro</title>
+    <title>Firebase App Check Key Generator</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1000px;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f0f2f5;
-            color: #333;
+            line-height: 1.6;
         }
         h1 {
-            color: #e74c3c;
+            color: #4285F4;
             text-align: center;
-            margin-bottom: 30px;
         }
         .container {
-            background-color: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .input-section {
-            margin-bottom: 25px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        button {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 18px;
-            width: 100%;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #c0392b;
-        }
-        .result {
-            margin-top: 30px;
-            padding: 20px;
             background-color: #f9f9f9;
             border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+            word-break: break-all;
+        }
+        button {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #3367D6;
+        }
+        .loading {
             display: none;
-            border-left: 4px solid #e74c3c;
-        }
-        .history-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .history-item {
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .tai {
-            background-color: rgba(46, 204, 113, 0.2);
-            color: #27ae60;
-            border: 1px solid #27ae60;
-        }
-        .xiu {
-            background-color: rgba(231, 76, 60, 0.2);
-            color: #c0392b;
-            border: 1px solid #c0392b;
-        }
-        .analysis-section {
-            margin-top: 25px;
-            padding: 15px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .prediction {
-            font-size: 20px;
-            padding: 15px;
-            text-align: center;
-            margin: 20px 0;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-            border: 1px dashed #3498db;
-        }
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            margin: 20px 0;
-        }
-        .stat-box {
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            min-width: 120px;
-            margin: 5px;
-        }
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 5px 0;
-        }
-        .trend-indicator {
-            font-size: 14px;
-            color: #7f8c8d;
-        }
-        .hot {
-            color: #e74c3c;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        .pattern {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #eaf2f8;
-            border-radius: 5px;
-        }
-        .error {
-            color: #e74c3c;
             margin-top: 10px;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
+    <h1>Firebase App Check Key Generator</h1>
+    
     <div class="container">
-        <h1>🔮 Công Cụ Phân Tích Tài Xỉu SunWin Pro</h1>
+        <p>Nhấn vào nút bên dưới để tạo Firebase App Check Key:</p>
         
-        <div class="input-section">
-            <label for="round-ids">Nhập mã phiên (ID các phiên, cách nhau bằng dấu phẩy hoặc xuống dòng):</label>
-            <textarea id="round-ids" placeholder="Ví dụ: 
-123456
-123457
-123458
-123459"></textarea>
-        </div>
+        <button id="generateBtn">Tạo Key</button>
+        <div id="loading" class="loading">Đang tạo key, vui lòng chờ...</div>
         
-        <div class="input-section">
-            <label for="results">Nhập kết quả tương ứng (Tài/Xỉu, cùng thứ tự với mã phiên):</label>
-            <textarea id="results" placeholder="Ví dụ: 
-Tài
-Xỉu
-Tài
-Tài"></textarea>
-            <div id="input-error" class="error"></div>
-        </div>
-        
-        <div class="input-section">
-            <label for="analysis-type">Chế độ phân tích:</label>
-            <select id="analysis-type">
-                <option value="advanced">Phân tích nâng cao</option>
-                <option value="pattern">Nhận diện mẫu chuỗi</option>
-                <option value="trend">Phân tích xu hướng</option>
-                <option value="probability">Thống kê xác suất</option>
-            </select>
-        </div>
-        
-        <button id="analyze-btn">PHÂN TÍCH & DỰ ĐOÁN</button>
-        
-        <div id="result" class="result">
-            <!-- Kết quả sẽ được hiển thị ở đây -->
+        <div id="result" class="result" style="display: none;">
+            <h3>Key của bạn:</h3>
+            <p id="key"></p>
+            <p><strong>Lưu ý:</strong> Key chỉ có hiệu lực trong 24 giờ.</p>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Thêm sự kiện click cho nút phân tích
-            document.getElementById('analyze-btn').addEventListener('click', analyzeData);
-        });
-
-        function analyzeData() {
-            // Reset thông báo lỗi
-            document.getElementById('input-error').textContent = '';
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const btn = this;
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const keyElement = document.getElementById('key');
             
-            // Lấy dữ liệu đầu vào
-            const roundIdsInput = document.getElementById('round-ids').value;
-            const resultsInput = document.getElementById('results').value;
-            const analysisType = document.getElementById('analysis-type').value;
+            btn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
             
-            // Kiểm tra dữ liệu đầu vào
-            if (!resultsInput.trim()) {
-                document.getElementById('input-error').textContent = 'Vui lòng nhập kết quả Tài/Xỉu';
-                return;
-            }
-            
-            // Xử lý dữ liệu
-            const roundIds = roundIdsInput.split(/[\n,]+/).map(id => id.trim()).filter(id => id !== '');
-            const results = resultsInput.split(/[\n,]+/).map(res => res.trim().toLowerCase()).filter(res => res !== '');
-            
-            // Kiểm tra kết quả hợp lệ
-            const invalidResults = results.filter(res => res !== 'tài' && res !== 'xỉu');
-            if (invalidResults.length > 0) {
-                document.getElementById('input-error').textContent = `Có kết quả không hợp lệ: ${invalidResults.join(', ')}. Chỉ chấp nhận "Tài" hoặc "Xỉu".`;
-                return;
-            }
-            
-            // Tạo nội dung kết quả
-            let resultHTML = `
-                <h2>📊 Kết Quả Phân Tích Chuyên Sâu</h2>
-                
-                <div class="stats">
-                    <div class="stat-box">
-                        <div>Tổng phiên</div>
-                        <div class="stat-value" id="total-rounds">${results.length}</div>
-                    </div>
-            `;
-            
-            // Thống kê cơ bản
-            const taiCount = results.filter(r => r === 'tài').length;
-            const xiuCount = results.filter(r => r === 'xỉu').length;
-            const taiPercent = results.length > 0 ? Math.round(taiCount / results.length * 100) : 0;
-            const xiuPercent = results.length > 0 ? Math.round(xiuCount / results.length * 100) : 0;
-            
-            resultHTML += `
-                    <div class="stat-box">
-                        <div>Tài</div>
-                        <div class="stat-value">${taiCount}</div>
-                        <div>${taiPercent}%</div>
-                    </div>
-                    <div class="stat-box">
-                        <div>Xỉu</div>
-                        <div class="stat-value">${xiuCount}</div>
-                        <div>${xiuPercent}%</div>
-                    </div>
-            `;
-            
-            // Phân tích xu hướng
-            let trend = "Ổn định";
-            let trendIndicator = "";
-            if (results.length >= 3) {
-                const last3 = results.slice(-3);
-                const taiLast3 = last3.filter(r => r === 'tài').length;
-                const xiuLast3 = last3.filter(r => r === 'xỉu').length;
-                
-                if (taiLast3 === 3) {
-                    trend = "Tài mạnh";
-                    trendIndicator = "🔥 Tài đang nóng";
-                } else if (xiuLast3 === 3) {
-                    trend = "Xỉu mạnh";
-                    trendIndicator = "❄️ Xỉu đang lạnh";
-                } else if (taiLast3 >= 2) {
-                    trend = "Tài nhẹ";
-                    trendIndicator = "↗️ Tài đang lên";
-                } else if (xiuLast3 >= 2) {
-                    trend = "Xỉu nhẹ";
-                    trendIndicator = "↘️ Xỉu đang xuống";
-                }
-            }
-            
-            resultHTML += `
-                    <div class="stat-box">
-                        <div>Xu hướng</div>
-                        <div class="stat-value">${trend}</div>
-                        <div class="trend-indicator ${trendIndicator.includes("nóng") || trendIndicator.includes("lạnh") ? 'hot' : ''}">${trendIndicator}</div>
-                    </div>
-                </div>
-            `;
-            
-            // Hiển thị lịch sử
-            resultHTML += `
-                <div class="analysis-section">
-                    <h3>📋 Lịch Sử Phiên</h3>
-                    <div class="history-grid" id="history-display">
-            `;
-            
-            results.forEach((result, index) => {
-                const roundId = index < roundIds.length ? roundIds[index] : (index + 1);
-                resultHTML += `
-                    <div class="history-item ${result === 'tài' ? 'tai' : 'xiu'}" title="Phiên ${roundId}: ${result === 'tài' ? 'Tài' : 'Xỉu'}">
-                        ${result === 'tài' ? 'T' : 'X'}
-                    </div>
-                `;
-            });
-            
-            resultHTML += `
-                    </div>
-                </div>
-            `;
-            
-            // Phân tích mẫu chuỗi
-            let sequences = [];
-            let currentSequence = [];
-            
-            for (let i = 0; i < results.length; i++) {
-                const result = results[i];
-                
-                if (currentSequence.length === 0 || currentSequence[currentSequence.length - 1] === result) {
-                    currentSequence.push(result);
-                } else {
-                    if (currentSequence.length >= 2) {
-                        sequences.push({
-                            type: currentSequence[0],
-                            length: currentSequence.length
-                        });
+            fetch('https://longdz137github.io/apikey/firebaseappcheck')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
-                    currentSequence = [result];
-                }
-            }
-            
-            // Thêm chuỗi cuối cùng
-            if (currentSequence.length >= 2) {
-                sequences.push({
-                    type: currentSequence[0],
-                    length: currentSequence.length
+                    return response.json();
+                })
+                .then(data => {
+                    keyElement.textContent = data.key || data.token || 'Không thể lấy key';
+                    result.style.display = 'block';
+                })
+                .catch(error => {
+                    keyElement.textContent = 'Lỗi khi tạo key: ' + error.message;
+                    result.style.display = 'block';
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    loading.style.display = 'none';
                 });
-            }
-            
-            resultHTML += `
-                <div class="analysis-section">
-                    <h3>🧩 Mẫu Chuỗi Phổ Biến</h3>
-            `;
-            
-            if (sequences.length > 0) {
-                const longestSequence = sequences.reduce((max, seq) => seq.length > max.length ? seq : max, sequences[0]);
-                resultHTML += `<p>Chuỗi dài nhất: ${longestSequence.length} lần ${longestSequence.type === 'tài' ? 'Tài' : 'Xỉu'} liên tiếp</p>`;
-                
-                const taiSequences = sequences.filter(seq => seq.type === 'tài');
-                const xiuSequences = sequences.filter(seq => seq.type === 'xỉu');
-                
-                if (taiSequences.length > 0) {
-                    const avgTaiSeq = Math.round(taiSequences.reduce((sum, seq) => sum + seq.length, 0) / taiSequences.length * 10) / 10;
-                    resultHTML += `<p>Trung bình chuỗi Tài: ${avgTaiSeq} phiên</p>`;
-                }
-                
-                if (xiuSequences.length > 0) {
-                    const avgXiuSeq = Math.round(xiuSequences.reduce((sum, seq) => sum + seq.length, 0) / xiuSequences.length * 10) / 10;
-                    resultHTML += `<p>Trung bình chuỗi Xỉu: ${avgXiuSeq} phiên</p>`;
-                }
-            } else {
-                resultHTML += `<p>Không tìm thấy chuỗi dài nào</p>`;
-            }
-            
-            resultHTML += `</div>`;
-            
-            // Dự đoán
-            resultHTML += `
-                <div class="prediction">
-                    <h3>🔮 Dự Đoán Phiên Tiếp Theo</h3>
-                    <div id="next-prediction" style="font-size: 24px; font-weight: bold;">
-            `;
-            
-            if (results.length < 3) {
-                resultHTML += "Cần ít nhất 3 phiên để dự đoán";
-            } else {
-                let predictionScore = 0;
-                const lastResult = results[results.length - 1];
-                const secondLastResult = results[results.length - 2];
-                
-                // 1. Xu hướng chung
-                if (taiCount > xiuCount) predictionScore += 1;
-                else if (xiuCount > taiCount) predictionScore -= 1;
-                
-                // 2. Xu hướng gần đây
-                const last3Tai = results.slice(-3).filter(r => r === 'tài').length;
-                const last3Xiu = results.slice(-3).filter(r => r === 'xỉu').length;
-                
-                if (last3Tai >= 2) predictionScore += 1.5;
-                if (last3Xiu >= 2) predictionScore -= 1.5;
-                
-                // 3. Mẫu lặp lại
-                if (lastResult === secondLastResult) {
-                    predictionScore += lastResult === 'tài' ? -1 : 1;
-                }
-                
-                // Đưa ra dự đoán
-                if (predictionScore > 0) {
-                    resultHTML += "TÀI";
-                    const confidence = Math.min(90, Math.max(60, Math.round(taiPercent + (predictionScore * 5)));
-                    resultHTML += `</div><div>Độ tin cậy: ${confidence}%</div>`;
-                    document.getElementById('next-prediction').style.color = "#27ae60";
-                } else if (predictionScore < 0) {
-                    resultHTML += "XỈU";
-                    const confidence = Math.min(90, Math.max(60, Math.round(xiuPercent + (Math.abs(predictionScore) * 5))));
-                    resultHTML += `</div><div>Độ tin cậy: ${confidence}%</div>`;
-                    document.getElementById('next-prediction').style.color = "#e74c3c";
-                } else {
-                    resultHTML += "KHÔNG RÕ";
-                    resultHTML += `</div><div>Không có đủ dữ liệu để dự đoán chính xác</div>`;
-                    document.getElementById('next-prediction').style.color = "#7f8c8d";
-                }
-            }
-            
-            resultHTML += `</div>`;
-            
-            // Hiển thị kết quả
-            document.getElementById('result').innerHTML = resultHTML;
-            document.getElementById('result').style.display = 'block';
-        }
+        });
     </script>
 </body>
 </html>
