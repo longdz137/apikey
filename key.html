@@ -3,245 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Trang web cung cấp key VIP Premium hàng ngày">
-    <meta name="keywords" content="key vip, key premium, key mmo, key free">
-    <title>VIP Premium Key Generator</title>
+    <meta name="description" content="Trang web hiển thị key từ tool bên ngoài">
+    <meta name="keywords" content="key vip, key tool, key mmo">
+    <title>Key Tool Hiển Thị</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        // Biến toàn cục
-        let vipKeys = [];
-        let currentKeyIndex = 0;
-        let isPremiumMode = false;
-        let musicPlaying = false;
-
-        // Khởi tạo khi tải trang
-        function init() {
-            updateTime();
-            getQueryParam();
-            loadVIPKeys();
-            setupEventListeners();
-            checkPremiumStatus();
-            
-            // Tự động phát nhạc nếu là premium
-            if (isPremiumMode) {
-                document.getElementById('backgroundMusic').volume = 0.3;
-                toggleMusic();
-            }
-        }
-
-        // Cập nhật thời gian thực
-        function updateTime() {
-            const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            };
-            
-            const dateTimeString = now.toLocaleDateString('vi-VN', options);
-            document.getElementById("clock").innerHTML = dateTimeString;
-            document.title = `VIP Key ${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
-            
-            setTimeout(updateTime, 1000);
-        }
-
-        // Lấy key từ URL
-        function getQueryParam() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const key = urlParams.get('ma');
-            const keyInput = document.getElementById('keyInput');
-            
-            if (key) {
-                keyInput.value = key;
-                showToast('Key đã được tải từ URL!', 'success');
-            } else {
-                keyInput.value = generateRandomKey();
-            }
-        }
-
-        // Tạo key ngẫu nhiên
-        function generateRandomKey() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = 'VIP-';
-            for (let i = 0; i < 12; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-                if ((i+1) % 4 === 0 && i !== 11) result += '-';
-            }
-            return result;
-        }
-
-        // Sao chép key
-        function copyToClipboard() {
-            const keyInput = document.getElementById('keyInput');
-            keyInput.select();
-            document.execCommand('copy');
-            
-            // Hiệu ứng copy
-            keyInput.classList.add('copied');
-            setTimeout(() => keyInput.classList.remove('copied'), 1000);
-            
-            showToast('Đã sao chép key: ' + keyInput.value, 'success');
-        }
-
-        // Điều khiển nhạc nền
-        function toggleMusic() {
-            const music = document.getElementById('backgroundMusic');
-            const musicButton = document.getElementById('musicButton');
-            
-            if (music.paused) {
-                music.play()
-                    .then(() => {
-                        musicButton.innerHTML = '<i class="fas fa-pause"></i> Dừng nhạc';
-                        musicPlaying = true;
-                    })
-                    .catch(e => showToast('Lỗi phát nhạc: ' + e, 'error'));
-            } else {
-                music.pause();
-                musicButton.innerHTML = '<i class="fas fa-play"></i> Phát nhạc';
-                musicPlaying = false;
-            }
-        }
-
-        // Hiển thị thông báo
-        function showToast(message, type) {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            });
-            
-            Toast.fire({
-                icon: type,
-                title: message
-            });
-        }
-
-        // Tải danh sách key VIP
-        function loadVIPKeys() {
-            // Trong thực tế, bạn sẽ gọi API để lấy danh sách key
-            // Đây là dữ liệu mẫu
-            vipKeys = [
-                "VIP-ABCD-EFGH-IJKL",
-                "VIP-MNOP-QRST-UVWX",
-                "VIP-YZ12-3456-7890",
-                "VIP-PREM-IUMK-EY01",
-                "VIP-GOLD-ENKE-Y202"
-            ];
-        }
-
-        // Chuyển đổi chế độ Premium
-        function togglePremiumMode() {
-            isPremiumMode = !isPremiumMode;
-            document.body.classList.toggle('premium-mode', isPremiumMode);
-            
-            if (isPremiumMode) {
-                showToast('Đã kích hoạt chế độ VIP Premium!', 'success');
-                document.getElementById('premiumBtn').innerHTML = '<i class="fas fa-crown"></i> VIP Premium';
-                
-                // Tự động phát nhạc nếu chưa phát
-                if (!musicPlaying) toggleMusic();
-            } else {
-                showToast('Đã tắt chế độ VIP Premium', 'info');
-                document.getElementById('premiumBtn').innerHTML = '<i class="fas fa-unlock"></i> Mở Premium';
-                
-                // Dừng nhạc khi tắt premium
-                if (musicPlaying) toggleMusic();
-            }
-        }
-
-        // Kiểm tra trạng thái Premium (ví dụ từ cookie/localStorage)
-        function checkPremiumStatus() {
-            // Trong thực tế, kiểm tra từ server hoặc localStorage
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            if (isPremium) togglePremiumMode();
-        }
-
-        // Lấy key tiếp theo
-        function getNextKey() {
-            if (vipKeys.length === 0) {
-                showToast('Không có key nào trong danh sách!', 'error');
-                return;
-            }
-            
-            currentKeyIndex = (currentKeyIndex + 1) % vipKeys.length;
-            document.getElementById('keyInput').value = vipKeys[currentKeyIndex];
-            showToast('Đã tải key VIP #' + (currentKeyIndex + 1), 'info');
-        }
-
-        // Thiết lập sự kiện
-        function setupEventListeners() {
-            // Hiệu ứng khi di chuột vào key
-            document.getElementById('keyInput').addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.02)';
-            });
-            
-            document.getElementById('keyInput').addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-            });
-            
-            // Phím tắt
-            document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey && e.key === 'c') {
-                    copyToClipboard();
-                } else if (e.key === 'ArrowRight') {
-                    getNextKey();
-                } else if (e.key === 'p') {
-                    togglePremiumMode();
-                } else if (e.key === 'm') {
-                    toggleMusic();
-                }
-            });
-        }
-
-        // Mở modal hướng dẫn
-        function showHelp() {
-            Swal.fire({
-                title: 'Hướng dẫn sử dụng',
-                html: `
-                    <div class="help-content">
-                        <p><strong>Cách sử dụng:</strong></p>
-                        <ul>
-                            <li>Nhấn <strong>Copy Key</strong> để sao chép key hiện tại</li>
-                            <li>Nhấn <strong>Key tiếp theo</strong> để lấy key VIP mới</li>
-                            <li>Nhấn <strong>VIP Premium</strong> để kích hoạt chế độ cao cấp</li>
-                            <li>Phím tắt:
-                                <ul>
-                                    <li>Ctrl+C: Sao chép key</li>
-                                    <li>→: Key tiếp theo</li>
-                                    <li>P: Bật/tắt Premium</li>
-                                    <li>M: Bật/tắt nhạc</li>
-                                </ul>
-                            </li>
-                        </ul>
-                        <p class="premium-features"><i class="fas fa-crown"></i> <strong>Tính năng Premium:</strong></p>
-                        <ul>
-                            <li>Nhạc nền chất lượng cao</li>
-                            <li>Giao diện cao cấp</li>
-                            <li>Key VIP đặc biệt</li>
-                            <li>Ưu tiên hỗ trợ</li>
-                        </ul>
-                    </div>
-                `,
-                icon: 'info',
-                confirmButtonText: 'Đã hiểu',
-                background: '#1e1e2d',
-                color: '#fff'
-            });
-        }
-
-        window.onload = init;
-    </script>
     <style>
         :root {
             --primary-color: #ff4757;
@@ -321,11 +87,6 @@
         @keyframes shine {
             0% { transform: translateX(-100%) rotate(30deg); }
             100% { transform: translateX(100%) rotate(30deg); }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { border-color: var(--primary-color); }
-            50% { border-color: #e84118; }
         }
         
         h1 {
@@ -496,7 +257,22 @@
             color: var(--text-light);
         }
         
-        /* Hiệu ứng premium */
+        /* Checkbox tự động copy */
+        .auto-copy-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            gap: 8px;
+        }
+        
+        .auto-copy-container input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            padding: 0;
+            transform: scale(1.2);
+        }
+        
+        /* Premium badge */
         .premium-badge {
             position: absolute;
             top: 10px;
@@ -540,25 +316,37 @@
                 flex-direction: column;
             }
         }
+        
+        /* YouTube Player ẩn */
+        #youtube-player {
+            position: fixed;
+            top: -100px;
+            left: -100px;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+            z-index: -100;
+        }
     </style>
 </head>
 <body>
-    <!-- Nhạc nền chất lượng cao -->
-    <audio id="backgroundMusic" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-        Trình duyệt của bạn không hỗ trợ audio element.
-    </audio>
+    <!-- Player YouTube ẩn -->
+    <div id="youtube-player"></div>
 
     <div class="loading-container">
         <span class="premium-badge"><i class="fas fa-crown"></i> VIP PREMIUM</span>
-        <h1><i class="fas fa-key"></i> VIP KEY GENERATOR</h1>
+        <h1><i class="fas fa-key"></i> KEY TOOL DISPLAY</h1>
         
         <div class="key-container">
             <input type="text" id="keyInput" readonly>
             
+            <div class="auto-copy-container">
+                <input type="checkbox" id="autoCopyCheckbox">
+                <label for="autoCopyCheckbox">Tự động copy khi nhận key</label>
+            </div>
+            
             <div class="btn-group">
                 <button onclick="copyToClipboard()"><i class="fas fa-copy"></i> Copy Key</button>
-                <button onclick="getNextKey()"><i class="fas fa-sync-alt"></i> Key tiếp theo</button>
                 <button id="musicButton" onclick="toggleMusic()"><i class="fas fa-play"></i> Phát nhạc</button>
                 <button id="premiumBtn" onclick="togglePremiumMode()"><i class="fas fa-unlock"></i> Mở Premium</button>
                 <button onclick="showHelp()"><i class="fas fa-question-circle"></i> Trợ giúp</button>
@@ -574,5 +362,235 @@
             </b>
         </div>
     </div>
+
+    <script>
+        // Biến toàn cục cho player YouTube
+        let youtubePlayer;
+        let isMusicPlaying = false;
+        const VIDEO_ID = 'uKT6j6kZXgc'; // Thay bằng ID video YouTube bạn muốn phát
+        
+        // Khởi tạo khi tải trang
+        function init() {
+            updateTime();
+            getQueryParam();
+            setupEventListeners();
+            checkPremiumStatus();
+            loadYouTubePlayer();
+        }
+        
+        // Tải YouTube Player
+        function loadYouTubePlayer() {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        }
+        
+        // Hàm này được YouTube API gọi khi sẵn sàng
+        function onYouTubeIframeAPIReady() {
+            youtubePlayer = new YT.Player('youtube-player', {
+                height: '0',
+                width: '0',
+                videoId: VIDEO_ID,
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'loop': 1,
+                    'modestbranding': 1,
+                    'playsinline': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+        
+        function onPlayerReady(event) {
+            console.log("YouTube Player đã sẵn sàng");
+            // Đặt âm lượng mặc định
+            event.target.setVolume(30);
+        }
+        
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                // Tự động phát lại khi kết thúc
+                event.target.playVideo();
+            }
+        }
+        
+        // Cập nhật thời gian thực
+        function updateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            
+            const dateTimeString = now.toLocaleDateString('vi-VN', options);
+            document.getElementById("clock").innerHTML = dateTimeString;
+            document.title = `Key Tool ${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+            
+            setTimeout(updateTime, 1000);
+        }
+        
+        // Lấy key từ URL (từ tool bên ngoài)
+        function getQueryParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const key = urlParams.get('ma');
+            const keyInput = document.getElementById('keyInput');
+            
+            if (key) {
+                keyInput.value = key;
+                showToast('Key đã được tải từ tool!', 'success');
+                
+                // Tự động copy key khi nhận được từ tool
+                if (document.getElementById('autoCopyCheckbox').checked) {
+                    copyToClipboard();
+                }
+            } else {
+                keyInput.value = 'Chưa nhận được key từ tool';
+                showToast('Không tìm thấy key trong URL', 'warning');
+            }
+        }
+        
+        // Sao chép key
+        function copyToClipboard() {
+            const keyInput = document.getElementById('keyInput');
+            keyInput.select();
+            document.execCommand('copy');
+            
+            // Hiệu ứng copy
+            keyInput.classList.add('copied');
+            setTimeout(() => keyInput.classList.remove('copied'), 1000);
+            
+            showToast('Đã sao chép key: ' + keyInput.value, 'success');
+        }
+        
+        // Điều khiển nhạc nền YouTube
+        function toggleMusic() {
+            if (!youtubePlayer) return;
+            
+            const musicButton = document.getElementById('musicButton');
+            
+            if (isMusicPlaying) {
+                youtubePlayer.pauseVideo();
+                musicButton.innerHTML = '<i class="fas fa-play"></i> Phát nhạc';
+                isMusicPlaying = false;
+            } else {
+                youtubePlayer.playVideo();
+                musicButton.innerHTML = '<i class="fas fa-pause"></i> Dừng nhạc';
+                isMusicPlaying = true;
+            }
+        }
+        
+        // Hiển thị thông báo
+        function showToast(message, type) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+            
+            Toast.fire({
+                icon: type,
+                title: message
+            });
+        }
+        
+        // Kiểm tra chế độ Premium
+        function checkPremiumStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const premium = urlParams.get('premium');
+            
+            if (premium === 'true') {
+                togglePremiumMode();
+            }
+        }
+        
+        // Chuyển đổi chế độ Premium
+        function togglePremiumMode() {
+            const isPremium = document.body.classList.toggle('premium-mode');
+            
+            if (isPremium) {
+                showToast('Đã kích hoạt chế độ VIP Premium!', 'success');
+                document.getElementById('premiumBtn').innerHTML = '<i class="fas fa-crown"></i> VIP Premium';
+                
+                // Tự động phát nhạc khi bật premium
+                if (!isMusicPlaying) toggleMusic();
+            } else {
+                showToast('Đã tắt chế độ VIP Premium', 'info');
+                document.getElementById('premiumBtn').innerHTML = '<i class="fas fa-unlock"></i> Mở Premium';
+            }
+        }
+        
+        // Thiết lập sự kiện
+        function setupEventListeners() {
+            // Hiệu ứng khi di chuột vào key
+            document.getElementById('keyInput').addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            document.getElementById('keyInput').addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+            
+            // Phím tắt
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'c') {
+                    copyToClipboard();
+                } else if (e.key === 'p') {
+                    togglePremiumMode();
+                } else if (e.key === 'm') {
+                    toggleMusic();
+                }
+            });
+        }
+        
+        // Mở modal hướng dẫn
+        function showHelp() {
+            Swal.fire({
+                title: 'Hướng dẫn sử dụng',
+                html: `
+                    <div class="help-content">
+                        <p><strong>Cách sử dụng:</strong></p>
+                        <ul>
+                            <li>Key sẽ được tự động lấy từ tool qua tham số URL <code>?ma=KEY_VALUE</code></li>
+                            <li>Nhấn <strong>Copy Key</strong> để sao chép key hiện tại</li>
+                            <li>Chọn <strong>Tự động copy</strong> để tự động sao chép khi nhận key</li>
+                            <li>Nhấn <strong>Phát nhạc</strong> để bật/tắt nhạc nền từ YouTube</li>
+                            <li>Nhấn <strong>VIP Premium</strong> để kích hoạt chế độ cao cấp</li>
+                            <li>Phím tắt:
+                                <ul>
+                                    <li>Ctrl+C: Sao chép key</li>
+                                    <li>P: Bật/tắt Premium</li>
+                                    <li>M: Bật/tắt nhạc</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Đã hiểu',
+                background: '#1e1e2d',
+                color: '#fff'
+            });
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
