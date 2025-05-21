@@ -1,165 +1,576 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Key Ngày Hôm Nay Là</title>
+    <meta name="description" content="Trang web cung cấp key VIP Premium hàng ngày">
+    <meta name="keywords" content="key vip, key premium, key mmo, key free">
+    <title>VIP Premium Key Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Biến toàn cục
+        let vipKeys = [];
+        let currentKeyIndex = 0;
+        let isPremiumMode = false;
+        let musicPlaying = false;
+
+        // Khởi tạo khi tải trang
+        function init() {
+            updateTime();
+            getQueryParam();
+            loadVIPKeys();
+            setupEventListeners();
+            checkPremiumStatus();
+            
+            // Tự động phát nhạc nếu là premium
+            if (isPremiumMode) {
+                document.getElementById('backgroundMusic').volume = 0.3;
+                toggleMusic();
+            }
+        }
+
+        // Cập nhật thời gian thực
         function updateTime() {
-            var now = new Date();
-            var hours = now.getHours();
-            var minutes = now.getMinutes();
-            var seconds = now.getSeconds();
-            var day = now.getDate();
-            var month = now.getMonth() + 1; // Tháng bắt đầu từ 0
-            var year = now.getFullYear();
-
-            hours = (hours < 10 ? "0" : "") + hours;
-            minutes = (minutes < 10 ? "0" : "") + minutes;
-            seconds = (seconds < 10 ? "0" : "") + seconds;
-
-            var timeString = hours + ":" + minutes + ":" + seconds;
-            document.getElementById("clock").innerHTML = timeString;
-
-            // Cập nhật ngày
-            var dateString = `Hôm nay là ngày ${day}/${month}/${year}`;
-            document.getElementById("dateDisplay").innerHTML = dateString;
-
-            // Cập nhật tiêu đề
-            document.title = `Key Ngày ${day}/${month}/${year} Là`;
-
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            
+            const dateTimeString = now.toLocaleDateString('vi-VN', options);
+            document.getElementById("clock").innerHTML = dateTimeString;
+            document.title = `VIP Key ${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+            
             setTimeout(updateTime, 1000);
         }
 
+        // Lấy key từ URL
         function getQueryParam() {
             const urlParams = new URLSearchParams(window.location.search);
             const key = urlParams.get('ma');
             const keyInput = document.getElementById('keyInput');
+            
             if (key) {
                 keyInput.value = key;
+                showToast('Key đã được tải từ URL!', 'success');
             } else {
-                keyInput.value = 'No key found';
+                keyInput.value = generateRandomKey();
             }
         }
 
+        // Tạo key ngẫu nhiên
+        function generateRandomKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = 'VIP-';
+            for (let i = 0; i < 12; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+                if ((i+1) % 4 === 0 && i !== 11) result += '-';
+            }
+            return result;
+        }
+
+        // Sao chép key
         function copyToClipboard() {
             const keyInput = document.getElementById('keyInput');
             keyInput.select();
             document.execCommand('copy');
-            alert('Key copied to clipboard: ' + keyInput.value);
+            
+            // Hiệu ứng copy
+            keyInput.classList.add('copied');
+            setTimeout(() => keyInput.classList.remove('copied'), 1000);
+            
+            showToast('Đã sao chép key: ' + keyInput.value, 'success');
         }
 
+        // Điều khiển nhạc nền
         function toggleMusic() {
             const music = document.getElementById('backgroundMusic');
             const musicButton = document.getElementById('musicButton');
-
+            
             if (music.paused) {
-                music.play();
-                musicButton.textContent = 'Pause Music';
+                music.play()
+                    .then(() => {
+                        musicButton.innerHTML = '<i class="fas fa-pause"></i> Dừng nhạc';
+                        musicPlaying = true;
+                    })
+                    .catch(e => showToast('Lỗi phát nhạc: ' + e, 'error'));
             } else {
                 music.pause();
-                musicButton.textContent = 'Play Music';
+                musicButton.innerHTML = '<i class="fas fa-play"></i> Phát nhạc';
+                musicPlaying = false;
             }
         }
 
-        window.onload = function () {
-            updateTime();
-            getQueryParam();
-        };
+        // Hiển thị thông báo
+        function showToast(message, type) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+            
+            Toast.fire({
+                icon: type,
+                title: message
+            });
+        }
+
+        // Tải danh sách key VIP
+        function loadVIPKeys() {
+            // Trong thực tế, bạn sẽ gọi API để lấy danh sách key
+            // Đây là dữ liệu mẫu
+            vipKeys = [
+                "VIP-ABCD-EFGH-IJKL",
+                "VIP-MNOP-QRST-UVWX",
+                "VIP-YZ12-3456-7890",
+                "VIP-PREM-IUMK-EY01",
+                "VIP-GOLD-ENKE-Y202"
+            ];
+        }
+
+        // Chuyển đổi chế độ Premium
+        function togglePremiumMode() {
+            isPremiumMode = !isPremiumMode;
+            document.body.classList.toggle('premium-mode', isPremiumMode);
+            
+            if (isPremiumMode) {
+                showToast('Đã kích hoạt chế độ VIP Premium!', 'success');
+                document.getElementById('premiumBtn').innerHTML = '<i class="fas fa-crown"></i> VIP Premium';
+                
+                // Tự động phát nhạc nếu chưa phát
+                if (!musicPlaying) toggleMusic();
+            } else {
+                showToast('Đã tắt chế độ VIP Premium', 'info');
+                document.getElementById('premiumBtn').innerHTML = '<i class="fas fa-unlock"></i> Mở Premium';
+                
+                // Dừng nhạc khi tắt premium
+                if (musicPlaying) toggleMusic();
+            }
+        }
+
+        // Kiểm tra trạng thái Premium (ví dụ từ cookie/localStorage)
+        function checkPremiumStatus() {
+            // Trong thực tế, kiểm tra từ server hoặc localStorage
+            const isPremium = localStorage.getItem('isPremium') === 'true';
+            if (isPremium) togglePremiumMode();
+        }
+
+        // Lấy key tiếp theo
+        function getNextKey() {
+            if (vipKeys.length === 0) {
+                showToast('Không có key nào trong danh sách!', 'error');
+                return;
+            }
+            
+            currentKeyIndex = (currentKeyIndex + 1) % vipKeys.length;
+            document.getElementById('keyInput').value = vipKeys[currentKeyIndex];
+            showToast('Đã tải key VIP #' + (currentKeyIndex + 1), 'info');
+        }
+
+        // Thiết lập sự kiện
+        function setupEventListeners() {
+            // Hiệu ứng khi di chuột vào key
+            document.getElementById('keyInput').addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            document.getElementById('keyInput').addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+            
+            // Phím tắt
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'c') {
+                    copyToClipboard();
+                } else if (e.key === 'ArrowRight') {
+                    getNextKey();
+                } else if (e.key === 'p') {
+                    togglePremiumMode();
+                } else if (e.key === 'm') {
+                    toggleMusic();
+                }
+            });
+        }
+
+        // Mở modal hướng dẫn
+        function showHelp() {
+            Swal.fire({
+                title: 'Hướng dẫn sử dụng',
+                html: `
+                    <div class="help-content">
+                        <p><strong>Cách sử dụng:</strong></p>
+                        <ul>
+                            <li>Nhấn <strong>Copy Key</strong> để sao chép key hiện tại</li>
+                            <li>Nhấn <strong>Key tiếp theo</strong> để lấy key VIP mới</li>
+                            <li>Nhấn <strong>VIP Premium</strong> để kích hoạt chế độ cao cấp</li>
+                            <li>Phím tắt:
+                                <ul>
+                                    <li>Ctrl+C: Sao chép key</li>
+                                    <li>→: Key tiếp theo</li>
+                                    <li>P: Bật/tắt Premium</li>
+                                    <li>M: Bật/tắt nhạc</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p class="premium-features"><i class="fas fa-crown"></i> <strong>Tính năng Premium:</strong></p>
+                        <ul>
+                            <li>Nhạc nền chất lượng cao</li>
+                            <li>Giao diện cao cấp</li>
+                            <li>Key VIP đặc biệt</li>
+                            <li>Ưu tiên hỗ trợ</li>
+                        </ul>
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Đã hiểu',
+                background: '#1e1e2d',
+                color: '#fff'
+            });
+        }
+
+        window.onload = init;
     </script>
     <style>
+        :root {
+            --primary-color: #ff4757;
+            --secondary-color: #2ed573;
+            --premium-gold: #ff9f43;
+            --dark-bg: #1e1e2d;
+            --light-bg: #f9f5f3;
+            --text-color: #2f3542;
+            --text-light: #f1f2f6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f9f5f3;
+            background-color: var(--light-bg);
+            color: var(--text-color);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
+        
+        body.premium-mode {
+            background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80');
+        }
+        
         .loading-container {
             text-align: center;
-            padding: 20px;
-            border: 2px solid #ef8682;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-            background-color: #fff;
-            animation: pulse 1.5s infinite;
-            width: 80vw;
-            max-width: 400px;
+            padding: 30px;
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 90vw;
+            max-width: 500px;
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
         }
+        
+        body.premium-mode .loading-container {
+            background-color: rgba(30, 30, 45, 0.9);
+            color: var(--text-light);
+            border-color: var(--premium-gold);
+            box-shadow: 0 10px 30px rgba(255, 159, 67, 0.3);
+        }
+        
+        .loading-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent 0%,
+                rgba(255, 71, 87, 0.1) 50%,
+                transparent 100%
+            );
+            transform: rotate(30deg);
+            z-index: -1;
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        
         @keyframes pulse {
-            0%, 100% {
-                border-color: #ef8682;
-            }
-            50% {
-                border-color: #e9514d;
-            }
+            0%, 100% { border-color: var(--primary-color); }
+            50% { border-color: #e84118; }
         }
+        
         h1 {
-            color: #03fcec;
-            font-size: 28px;
+            color: var(--primary-color);
+            font-size: 32px;
             margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: inline-block;
         }
+        
+        body.premium-mode h1 {
+            color: var(--premium-gold);
+            text-shadow: 0 0 10px rgba(255, 159, 67, 0.5);
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary-color), transparent);
+        }
+        
+        body.premium-mode h1::after {
+            background: linear-gradient(to right, var(--premium-gold), transparent);
+        }
+        
         .key-container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 15px;
+            margin: 20px 0;
         }
+        
         input {
             text-align: center;
-            width: 80%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 2px solid #fc0303;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease-in-out;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        
+        body.premium-mode input {
+            background-color: rgba(47, 53, 66, 0.8);
+            color: white;
+            border-color: var(--premium-gold);
+        }
+        
         input:hover, input:focus {
-            border-color: #e9514d;
+            border-color: #e84118;
+            transform: scale(1.02);
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
         }
+        
+        body.premium-mode input:hover, 
+        body.premium-mode input:focus {
+            border-color: #ff9f43;
+            box-shadow: 0 0 15px rgba(255, 159, 67, 0.5);
+        }
+        
+        input.copied {
+            animation: copied 0.5s;
+        }
+        
+        @keyframes copied {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+        
         button {
-            background-color: #ef8682;
-            color: #fff;
+            background-color: var(--primary-color);
+            color: white;
             padding: 12px 24px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s ease-in-out;
-            margin-bottom: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
         }
+        
         button:hover {
-            background-color: #e9514d;
+            background-color: #e84118;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        body.premium-mode button {
+            background-color: var(--premium-gold);
+        }
+        
+        body.premium-mode button:hover {
+            background-color: #ff7f00;
+        }
+        
+        #premiumBtn {
+            background: linear-gradient(135deg, #ff9f43, #ff6b81);
+        }
+        
+        body.premium-mode #premiumBtn {
+            background: linear-gradient(135deg, #ff9f43, #feca57);
+            box-shadow: 0 0 15px rgba(255, 159, 67, 0.5);
+        }
+        
         .footer {
             text-align: center;
             margin-top: 20px;
-            color: #555;
+            color: var(--text-color);
             font-size: 14px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        body.premium-mode .footer {
+            color: var(--text-light);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        body.premium-mode .admin-link {
+            color: var(--premium-gold);
+        }
+        
+        .admin-link:hover {
+            text-decoration: underline;
+        }
+        
+        #dateDisplay {
+            margin: 15px 0;
+            font-size: 18px;
+            color: var(--text-color);
+        }
+        
+        body.premium-mode #dateDisplay {
+            color: var(--text-light);
+        }
+        
+        /* Hiệu ứng premium */
+        .premium-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--premium-gold);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        body.premium-mode .premium-badge {
+            display: block;
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .loading-container {
+                padding: 20px;
+                width: 95vw;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            input {
+                font-size: 16px;
+                padding: 12px;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Bật nhạc nền -->
+    <!-- Nhạc nền chất lượng cao -->
     <audio id="backgroundMusic" loop>
-        <source src="https://rr4---sn-npoeens7.googlevideo.com/videoplayback?expire=1738570417&ei=USagZ4Vk6_nE3w-x7KCJBg&ip=172.64.236.154&id=o-AAimGCMhLlnkFgQqbULLm4c5rLQiwpJXAB9aLLiMq4KH&itag=140&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&bui=AY2Et-NhXWJuEA_aAiv4s4CMjS0GNJ5kVy9qweCNCESmMcFo7gwC7u2n02jFCTAEYi17h2MNMEdZl1cQ&spc=9kzgDe0cTB4wLXbrqCENjNXF39FeMaXArlp1tUthP0Mj7BFN6PRwObzbGw&vprv=1&svpuc=1&mime=audio%2Fmp4&ns=ciOnzHLpGKSoPvsrdclhYhoQ&rqh=1&gir=yes&clen=12915678&dur=798.000&lmt=1726163663589433&keepalive=yes&lmw=1&fexp=24350590,24350737,24350827,24350933,24350961,24350977,24350999,24351028,24351059,24351082,51326932,51371294&c=TVHTML5&sefc=1&txp=5432434&n=oOVy0aSPT2m58w&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AJfQdSswRAIgdqeR7ocPNLzfZ8ZpZkVJl9uhPiHnTmW-oIiDy0YosScCIGMbR3y4GUPaOW9VkEYfsnYGZDMJ1_1ub20amE3pVmcd&title=Cari+Pokemon+-+Mit+x+AM+Remix+%E2%9C%AA+Mochi+Entertainment+%7C%7C+Nh%E1%BA%A1c+Hot+Tiktok+Hay+Nh%E1%BA%A5t+2023%23mochi&rm=sn-h5q6l7l&rrc=104,80&req_id=442fafdb2aeca3ee&ipbypass=yes&redirect_counter=2&cm2rm=sn-8qj-2m0e7s&cms_redirect=yes&cmsv=e&met=1738548821,&mh=0l&mip=2001:ee0:4e1d:40f0:9918:bf84:9f64:6e22&mm=29&mn=sn-npoeens7&ms=rdu&mt=1738548536&mv=m&mvi=4&pl=48&rms=rdu,au&lsparams=ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=AGluJ3MwRgIhAPO94cqTh07m1khvJ4OP-lmnxEMqYdMS4DdevPGj-IEbAiEAmoIOxCicTNa-4Z5bebL0gq_d-TwAiwySZjFQUB5sSu8%3D" type="audio/mpeg">
-        Your browser does not support the audio element.
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        Trình duyệt của bạn không hỗ trợ audio element.
     </audio>
 
     <div class="loading-container">
-        <h1>Key Ngày Là</h1>
+        <span class="premium-badge"><i class="fas fa-crown"></i> VIP PREMIUM</span>
+        <h1><i class="fas fa-key"></i> VIP KEY GENERATOR</h1>
+        
         <div class="key-container">
             <input type="text" id="keyInput" readonly>
-            <button onclick="copyToClipboard()">Copy Key</button>
-            <button id="musicButton" onclick="toggleMusic()">Play Music</button>
+            
+            <div class="btn-group">
+                <button onclick="copyToClipboard()"><i class="fas fa-copy"></i> Copy Key</button>
+                <button onclick="getNextKey()"><i class="fas fa-sync-alt"></i> Key tiếp theo</button>
+                <button id="musicButton" onclick="toggleMusic()"><i class="fas fa-play"></i> Phát nhạc</button>
+                <button id="premiumBtn" onclick="togglePremiumMode()"><i class="fas fa-unlock"></i> Mở Premium</button>
+                <button onclick="showHelp()"><i class="fas fa-question-circle"></i> Trợ giúp</button>
+            </div>
         </div>
-        <div id="dateDisplay" style="margin-top: 10px; font-size: 18px; color: #555;"></div>
+        
+        <div id="dateDisplay"></div>
+        
         <div class="footer">
-            <b>Copyright By 
+            <b>Bản quyền bởi 
                 <a href="https://zalo.me/0334063029" class="admin-link">Long Ng Văn Mmo</a> | 
-                Time: <span id="clock"></span>
+                <span id="clock"></span>
             </b>
         </div>
     </div>
