@@ -3,594 +3,417 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Trang web hiển thị key từ tool bên ngoài">
-    <meta name="keywords" content="key vip, key tool, key mmo">
-    <title>Key Tool Hiển Thị</title>
+    <meta name="description" content="Key generator with real-time clock and date display">
+    <meta name="author" content="Nguyễn Duy Khánh">
+    <title>Key Generator | Real-time</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const options = { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false
+            };
+            const timeString = now.toLocaleTimeString('vi-VN', options);
+            document.getElementById("clock").textContent = timeString;
+
+            // Date display
+            const dateOptions = { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'numeric', 
+                year: 'numeric' 
+            };
+            const dateString = now.toLocaleDateString('vi-VN', dateOptions);
+            document.getElementById("dateDisplay").innerHTML = `Hôm nay là <strong>${dateString}</strong>`;
+
+            // Update title
+            document.title = `Key Generator | ${dateString}`;
+
+            setTimeout(updateTime, 1000);
+        }
+
+        function getQueryParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const key = urlParams.get('ma');
+            const keyInput = document.getElementById('keyInput');
+            if (key) {
+                keyInput.value = key;
+                animateKeyAppearance();
+            } else {
+                keyInput.value = 'Không tìm thấy key';
+            }
+        }
+
+        function animateKeyAppearance() {
+            const keyInput = document.getElementById('keyInput');
+            keyInput.style.transform = 'scale(1.05)';
+            keyInput.style.boxShadow = '0 0 15px rgba(62, 207, 142, 0.6)';
+            setTimeout(() => {
+                keyInput.style.transform = 'scale(1)';
+                keyInput.style.boxShadow = '0 0 10px rgba(62, 207, 142, 0.4)';
+            }, 500);
+        }
+
+        function copyToClipboard() {
+            const keyInput = document.getElementById('keyInput');
+            keyInput.select();
+            document.execCommand('copy');
+            
+            // Show notification instead of alert
+            const notification = document.createElement('div');
+            notification.className = 'copy-notification';
+            notification.innerHTML = `<i class="fas fa-check-circle"></i> Đã copy: ${keyInput.value}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 2000);
+            }, 10);
+        }
+
+        function toggleMusic() {
+            const music = document.getElementById('backgroundMusic');
+            const musicButton = document.getElementById('musicButton');
+            const icon = musicButton.querySelector('i');
+
+            if (music.paused) {
+                music.play();
+                icon.className = 'fas fa-pause';
+                musicButton.querySelector('span').textContent = ' Tạm dừng';
+            } else {
+                music.pause();
+                icon.className = 'fas fa-play';
+                musicButton.querySelector('span').textContent = ' Phát nhạc';
+            }
+        }
+
+        function initVolumeControl() {
+            const music = document.getElementById('backgroundMusic');
+            const volumeSlider = document.getElementById('volumeSlider');
+            
+            // Set initial volume
+            music.volume = volumeSlider.value / 100;
+            
+            volumeSlider.addEventListener('input', () => {
+                music.volume = volumeSlider.value / 100;
+            });
+        }
+
+        window.onload = function () {
+            updateTime();
+            getQueryParam();
+            initVolumeControl();
+            
+            // Add animation to container on load
+            const container = document.querySelector('.container');
+            setTimeout(() => {
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        };
+    </script>
     <style>
         :root {
-            --primary-color: #ff4757;
-            --secondary-color: #2ed573;
-            --premium-gold: #ff9f43;
-            --dark-bg: #1e1e2d;
-            --light-bg: #f9f5f3;
-            --text-color: #2f3542;
-            --text-light: #f1f2f6;
+            --primary-color: #3ecf8e;
+            --primary-dark: #2bb673;
+            --secondary-color: #5b6be8;
+            --dark-color: #1a1d28;
+            --light-color: #f8f9fa;
+            --gray-color: #6c757d;
+            --danger-color: #ff5b5b;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: all 0.3s ease;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1d28, #2a2f3d);
+            color: var(--light-color);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            line-height: 1.6;
         }
         
-        body.premium-mode {
-            background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80');
-        }
-        
-        .loading-container {
-            text-align: center;
-            padding: 30px;
-            border: 2px solid var(--primary-color);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            background-color: rgba(255, 255, 255, 0.9);
-            width: 90vw;
+        .container {
+            width: 90%;
             max-width: 500px;
-            backdrop-filter: blur(5px);
-            position: relative;
-            overflow: hidden;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
         }
         
-        body.premium-mode .loading-container {
-            background-color: rgba(30, 30, 45, 0.9);
-            color: var(--text-light);
-            border-color: var(--premium-gold);
-            box-shadow: 0 10px 30px rgba(255, 159, 67, 0.3);
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
-        .loading-container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                to bottom right,
-                transparent 0%,
-                rgba(255, 71, 87, 0.1) 50%,
-                transparent 100%
-            );
-            transform: rotate(30deg);
-            z-index: -1;
-            animation: shine 3s infinite;
-        }
-        
-        @keyframes shine {
-            0% { transform: translateX(-100%) rotate(30deg); }
-            100% { transform: translateX(100%) rotate(30deg); }
+        .logo i {
+            margin-right: 0.5rem;
         }
         
         h1 {
-            color: var(--primary-color);
-            font-size: 32px;
-            margin-bottom: 20px;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-            position: relative;
-            display: inline-block;
-        }
-        
-        body.premium-mode h1 {
-            color: var(--premium-gold);
-            text-shadow: 0 0 10px rgba(255, 159, 67, 0.5);
-        }
-        
-        h1::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(to right, var(--primary-color), transparent);
-        }
-        
-        body.premium-mode h1::after {
-            background: linear-gradient(to right, var(--premium-gold), transparent);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .key-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            margin: 20px 0;
+            margin: 2rem 0;
         }
         
         input {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--light-color);
             text-align: center;
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 10px;
-            border: 2px solid var(--primary-color);
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            background-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        body.premium-mode input {
-            background-color: rgba(47, 53, 66, 0.8);
-            color: white;
-            border-color: var(--premium-gold);
-        }
-        
-        input:hover, input:focus {
-            border-color: #e84118;
-            transform: scale(1.02);
+            font-weight: 500;
+            transition: var(--transition);
             outline: none;
-            box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
         }
         
-        body.premium-mode input:hover, 
-        body.premium-mode input:focus {
-            border-color: #ff9f43;
-            box-shadow: 0 0 15px rgba(255, 159, 67, 0.5);
+        input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(62, 207, 142, 0.4);
         }
         
-        input.copied {
-            animation: copied 0.5s;
-        }
-        
-        @keyframes copied {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .btn-group {
-            display: flex;
-            flex-wrap: wrap;
+        .btn {
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            gap: 10px;
-            width: 100%;
-        }
-        
-        button {
-            background-color: var(--primary-color);
+            background: var(--primary-color);
             color: white;
-            padding: 12px 24px;
+            padding: 0.8rem 1.5rem;
             border: none;
             border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            flex: 1;
-            min-width: 120px;
-            justify-content: center;
+            transition: var(--transition);
+            margin: 0.5rem;
+            box-shadow: 0 4px 15px rgba(62, 207, 142, 0.3);
         }
         
-        button:hover {
-            background-color: #e84118;
+        .btn:hover {
+            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 20px rgba(62, 207, 142, 0.4);
         }
         
-        button:active {
-            transform: translateY(0);
+        .btn i {
+            margin-right: 0.5rem;
         }
         
-        body.premium-mode button {
-            background-color: var(--premium-gold);
+        .btn-danger {
+            background: var(--danger-color);
+            box-shadow: 0 4px 15px rgba(255, 91, 91, 0.3);
         }
         
-        body.premium-mode button:hover {
-            background-color: #ff7f00;
+        .btn-danger:hover {
+            background: #e04a4a;
+            box-shadow: 0 6px 20px rgba(255, 91, 91, 0.4);
         }
         
-        #premiumBtn {
-            background: linear-gradient(135deg, #ff9f43, #ff6b81);
+        .date-display {
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
         }
         
-        body.premium-mode #premiumBtn {
-            background: linear-gradient(135deg, #ff9f43, #feca57);
-            box-shadow: 0 0 15px rgba(255, 159, 67, 0.5);
+        .date-display strong {
+            color: var(--primary-color);
+            font-weight: 500;
         }
         
         .footer {
-            text-align: center;
-            margin-top: 20px;
-            color: var(--text-color);
-            font-size: 14px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: var(--gray-color);
         }
         
-        body.premium-mode .footer {
-            color: var(--text-light);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .admin-link {
+        .footer a {
             color: var(--primary-color);
             text-decoration: none;
-            font-weight: bold;
+            transition: var(--transition);
         }
         
-        body.premium-mode .admin-link {
-            color: var(--premium-gold);
-        }
-        
-        .admin-link:hover {
+        .footer a:hover {
             text-decoration: underline;
         }
         
-        #dateDisplay {
-            margin: 15px 0;
-            font-size: 18px;
-            color: var(--text-color);
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1rem;
         }
         
-        body.premium-mode #dateDisplay {
-            color: var(--text-light);
-        }
-        
-        /* Checkbox tự động copy */
-        .auto-copy-container {
+        .volume-control {
             display: flex;
             align-items: center;
-            margin: 10px 0;
-            gap: 8px;
+            margin-top: 1rem;
+            width: 100%;
         }
         
-        .auto-copy-container input[type="checkbox"] {
-            width: auto;
-            margin: 0;
-            padding: 0;
-            transform: scale(1.2);
+        .volume-control i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
         }
         
-        /* Premium badge */
-        .premium-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: var(--premium-gold);
+        .volume-control input[type="range"] {
+            flex-grow: 1;
+            height: 5px;
+            margin: 0 0.5rem;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        .volume-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .copy-notification {
+            position: fixed;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
             color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            display: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
         }
         
-        body.premium-mode .premium-badge {
-            display: block;
-            animation: pulse 1.5s infinite;
+        .copy-notification.show {
+            bottom: 20px;
+            opacity: 1;
         }
         
-        /* Responsive */
-        @media (max-width: 600px) {
-            .loading-container {
-                padding: 20px;
-                width: 95vw;
+        .copy-notification i {
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 1.5rem;
+                width: 95%;
             }
             
             h1 {
-                font-size: 24px;
+                font-size: 1.5rem;
             }
             
-            input {
-                font-size: 16px;
-                padding: 12px;
-            }
-            
-            button {
-                padding: 10px 15px;
-                font-size: 14px;
-            }
-            
-            .btn-group {
+            .controls {
                 flex-direction: column;
             }
-        }
-        
-        /* YouTube Player ẩn */
-        #youtube-player {
-            position: fixed;
-            top: -100px;
-            left: -100px;
-            width: 10px;
-            height: 10px;
-            opacity: 0;
-            z-index: -100;
+            
+            .btn {
+                width: 100%;
+                margin: 0.3rem 0;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Player YouTube ẩn -->
-    <div id="youtube-player"></div>
+    <audio id="backgroundMusic" loop>
+        <source src="https://rr4---sn-npoeens7.googlevideo.com/videoplayback?expire=1738570417&ei=USagZ4Vk6_nE3w-x7KCJBg&ip=172.64.236.154&id=o-AAimGCMhLlnkFgQqbULLm4c5rLQiwpJXAB9aLLiMq4KH&itag=140&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&bui=AY2Et-NhXWJuEA_aAiv4s4CMjS0GNJ5kVy9qweCNCESmMcFo7gwC7u2n02jFCTAEYi17h2MNMEdZl1cQ&spc=9kzgDe0cTB4wLXbrqCENjNXF39FeMaXArlp1tUthP0Mj7BFN6PRwObzbGw&vprv=1&svpuc=1&mime=audio%2Fmp4&ns=ciOnzHLpGKSoPvsrdclhYhoQ&rqh=1&gir=yes&clen=12915678&dur=798.000&lmt=1726163663589433&keepalive=yes&lmw=1&fexp=24350590,24350737,24350827,24350933,24350961,24350977,24350999,24351028,24351059,24351082,51326932,51371294&c=TVHTML5&sefc=1&txp=5432434&n=oOVy0aSPT2m58w&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AJfQdSswRAIgdqeR7ocPNLzfZ8ZpZkVJl9uhPiHnTmW-oIiDy0YosScCIGMbR3y4GUPaOW9VkEYfsnYGZDMJ1_1ub20amE3pVmcd&title=Cari+Pokemon+-+Mit+x+AM+Remix+%E2%9C%AA+Mochi+Entertainment+%7C%7C+Nh%E1%BA%A1c+Hot+Tiktok+Hay+Nh%E1%BA%A5t+2023%23mochi&rm=sn-h5q6l7l&rrc=104,80&req_id=442fafdb2aeca3ee&ipbypass=yes&redirect_counter=2&cm2rm=sn-8qj-2m0e7s&cms_redirect=yes&cmsv=e&met=1738548821,&mh=0l&mip=2001:ee0:4e1d:40f0:9918:bf84:9f64:6e22&mm=29&mn=sn-npoeens7&ms=rdu&mt=1738548536&mv=m&mvi=4&pl=48&rms=rdu,au&lsparams=ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=AGluJ3MwRgIhAPO94cqTh07m1khvJ4OP-lmnxEMqYdMS4DdevPGj-IEbAiEAmoIOxCicTNa-4Z5bebL0gq_d-TwAiwySZjFQUB5sSu8%3D" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
-    <div class="loading-container">
-        <span class="premium-badge"><i class="fas fa-crown"></i> VIP PREMIUM</span>
-        <h1><i class="fas fa-key"></i> KEY TOOL DISPLAY</h1>
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-key"></i>
+            <span>Key Generator</span>
+        </div>
+        
+        <h1>Key Ngày Hôm Nay</h1>
         
         <div class="key-container">
             <input type="text" id="keyInput" readonly>
             
-            <div class="auto-copy-container">
-                <input type="checkbox" id="autoCopyCheckbox">
-                <label for="autoCopyCheckbox">Tự động copy khi nhận key</label>
+            <div class="controls">
+                <button class="btn" onclick="copyToClipboard()">
+                    <i class="fas fa-copy"></i>
+                    <span>Sao chép</span>
+                </button>
+                <button id="musicButton" class="btn btn-danger" onclick="toggleMusic()">
+                    <i class="fas fa-play"></i>
+                    <span>Phát nhạc</span>
+                </button>
             </div>
             
-            <div class="btn-group">
-                <button onclick="copyToClipboard()"><i class="fas fa-copy"></i> Copy Key</button>
-                <button id="musicButton" onclick="toggleMusic()"><i class="fas fa-play"></i> Phát nhạc</button>
-                <button id="premiumBtn" onclick="togglePremiumMode()"><i class="fas fa-unlock"></i> Mở Premium</button>
-                <button onclick="showHelp()"><i class="fas fa-question-circle"></i> Trợ giúp</button>
+            <div class="volume-control">
+                <i class="fas fa-volume-up"></i>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                <i class="fas fa-volume-down"></i>
             </div>
         </div>
         
-        <div id="dateDisplay"></div>
+        <div id="dateDisplay" class="date-display"></div>
         
         <div class="footer">
-            <b>Bản quyền bởi 
-                <a href="https://zalo.me/0334063029" class="admin-link">Long Ng Văn Mmo</a> | 
-                <span id="clock"></span>
-            </b>
+            <p>
+                <b>Copyright © <span id="year"></span> 
+                <a href="https://zalo.me/0334063029">NVL MEDIA</a> | 
+                Thời gian: <span id="clock"></span>
+                </b>
+            </p>
         </div>
     </div>
-
+    
     <script>
-        // Biến toàn cục cho player YouTube
-        let youtubePlayer;
-        let isMusicPlaying = false;
-        const VIDEO_ID = 'uKT6j6kZXgc'; // Thay bằng ID video YouTube bạn muốn phát
-        
-        // Khởi tạo khi tải trang
-        function init() {
-            updateTime();
-            getQueryParam();
-            setupEventListeners();
-            checkPremiumStatus();
-            loadYouTubePlayer();
-        }
-        
-        // Tải YouTube Player
-        function loadYouTubePlayer() {
-            const tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        }
-        
-        // Hàm này được YouTube API gọi khi sẵn sàng
-        function onYouTubeIframeAPIReady() {
-            youtubePlayer = new YT.Player('youtube-player', {
-                height: '0',
-                width: '0',
-                videoId: VIDEO_ID,
-                playerVars: {
-                    'autoplay': 0,
-                    'controls': 0,
-                    'disablekb': 1,
-                    'fs': 0,
-                    'loop': 1,
-                    'modestbranding': 1,
-                    'playsinline': 1
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-        
-        function onPlayerReady(event) {
-            console.log("YouTube Player đã sẵn sàng");
-            // Đặt âm lượng mặc định
-            event.target.setVolume(30);
-        }
-        
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.ENDED) {
-                // Tự động phát lại khi kết thúc
-                event.target.playVideo();
-            }
-        }
-        
-        // Cập nhật thời gian thực
-        function updateTime() {
-            const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            };
-            
-            const dateTimeString = now.toLocaleDateString('vi-VN', options);
-            document.getElementById("clock").innerHTML = dateTimeString;
-            document.title = `Key Tool ${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
-            
-            setTimeout(updateTime, 1000);
-        }
-        
-        // Lấy key từ URL (từ tool bên ngoài)
-        function getQueryParam() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const key = urlParams.get('ma');
-            const keyInput = document.getElementById('keyInput');
-            
-            if (key) {
-                keyInput.value = key;
-                showToast('Key đã được tải từ tool!', 'success');
-                
-                // Tự động copy key khi nhận được từ tool
-                if (document.getElementById('autoCopyCheckbox').checked) {
-                    copyToClipboard();
-                }
-            } else {
-                keyInput.value = 'Chưa nhận được key từ tool';
-                showToast('Không tìm thấy key trong URL', 'warning');
-            }
-        }
-        
-        // Sao chép key
-        function copyToClipboard() {
-            const keyInput = document.getElementById('keyInput');
-            keyInput.select();
-            document.execCommand('copy');
-            
-            // Hiệu ứng copy
-            keyInput.classList.add('copied');
-            setTimeout(() => keyInput.classList.remove('copied'), 1000);
-            
-            showToast('Đã sao chép key: ' + keyInput.value, 'success');
-        }
-        
-        // Điều khiển nhạc nền YouTube
-        function toggleMusic() {
-            if (!youtubePlayer) return;
-            
-            const musicButton = document.getElementById('musicButton');
-            
-            if (isMusicPlaying) {
-                youtubePlayer.pauseVideo();
-                musicButton.innerHTML = '<i class="fas fa-play"></i> Phát nhạc';
-                isMusicPlaying = false;
-            } else {
-                youtubePlayer.playVideo();
-                musicButton.innerHTML = '<i class="fas fa-pause"></i> Dừng nhạc';
-                isMusicPlaying = true;
-            }
-        }
-        
-        // Hiển thị thông báo
-        function showToast(message, type) {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            });
-            
-            Toast.fire({
-                icon: type,
-                title: message
-            });
-        }
-        
-        // Kiểm tra chế độ Premium
-        function checkPremiumStatus() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const premium = urlParams.get('premium');
-            
-            if (premium === 'true') {
-                togglePremiumMode();
-            }
-        }
-        
-        // Chuyển đổi chế độ Premium
-        function togglePremiumMode() {
-            const isPremium = document.body.classList.toggle('premium-mode');
-            
-            if (isPremium) {
-                showToast('Đã kích hoạt chế độ VIP Premium!', 'success');
-                document.getElementById('premiumBtn').innerHTML = '<i class="fas fa-crown"></i> VIP Premium';
-                
-                // Tự động phát nhạc khi bật premium
-                if (!isMusicPlaying) toggleMusic();
-            } else {
-                showToast('Đã tắt chế độ VIP Premium', 'info');
-                document.getElementById('premiumBtn').innerHTML = '<i class="fas fa-unlock"></i> Mở Premium';
-            }
-        }
-        
-        // Thiết lập sự kiện
-        function setupEventListeners() {
-            // Hiệu ứng khi di chuột vào key
-            document.getElementById('keyInput').addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.02)';
-            });
-            
-            document.getElementById('keyInput').addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-            });
-            
-            // Phím tắt
-            document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey && e.key === 'c') {
-                    copyToClipboard();
-                } else if (e.key === 'p') {
-                    togglePremiumMode();
-                } else if (e.key === 'm') {
-                    toggleMusic();
-                }
-            });
-        }
-        
-        // Mở modal hướng dẫn
-        function showHelp() {
-            Swal.fire({
-                title: 'Hướng dẫn sử dụng',
-                html: `
-                    <div class="help-content">
-                        <p><strong>Cách sử dụng:</strong></p>
-                        <ul>
-                            <li>Key sẽ được tự động lấy từ tool qua tham số URL <code>?ma=KEY_VALUE</code></li>
-                            <li>Nhấn <strong>Copy Key</strong> để sao chép key hiện tại</li>
-                            <li>Chọn <strong>Tự động copy</strong> để tự động sao chép khi nhận key</li>
-                            <li>Nhấn <strong>Phát nhạc</strong> để bật/tắt nhạc nền từ YouTube</li>
-                            <li>Nhấn <strong>VIP Premium</strong> để kích hoạt chế độ cao cấp</li>
-                            <li>Phím tắt:
-                                <ul>
-                                    <li>Ctrl+C: Sao chép key</li>
-                                    <li>P: Bật/tắt Premium</li>
-                                    <li>M: Bật/tắt nhạc</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-                `,
-                icon: 'info',
-                confirmButtonText: 'Đã hiểu',
-                background: '#1e1e2d',
-                color: '#fff'
-            });
-        }
-
-        window.onload = init;
+        // Set current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
     </script>
 </body>
 </html>
