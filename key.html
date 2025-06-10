@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Key generator with real-time clock and date display">
+    <meta name="description" content="Trình tạo key cao cấp với đồng hồ thời gian thực">
     <meta name="author" content="NVL MEDIA">
-    <title>Key Generator | Real-time</title>
+    <title>Luxury Key Generator | Real-time</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
+        // Biến toàn cục
+        let currentMusic = {
+            title: "Nhạc TikTok Hot 2024",
+            artist: "Mochi Entertainment",
+            url: "https://www.youtube.com/watch?v=YPen1KRa9g4" // Thay bằng link YouTube thực
+        };
+
         function updateTime() {
             const now = new Date();
             const options = { 
@@ -22,7 +29,7 @@
             const timeString = now.toLocaleTimeString('vi-VN', options);
             document.getElementById("clock").textContent = timeString;
 
-            // Date display
+            // Hiển thị ngày tháng
             const dateOptions = { 
                 weekday: 'long', 
                 day: 'numeric', 
@@ -30,10 +37,10 @@
                 year: 'numeric' 
             };
             const dateString = now.toLocaleDateString('vi-VN', dateOptions);
-            document.getElementById("dateDisplay").innerHTML = `Hôm nay là <strong>${dateString}</strong>`;
+            document.getElementById("dateDisplay").innerHTML = `<span class="luxury-text">Hôm nay</span> là <strong>${dateString}</strong>`;
 
-            // Update title
-            document.title = `Key Generator | ${dateString}`;
+            // Cập nhật tiêu đề
+            document.title = `Luxury Key | ${dateString}`;
 
             setTimeout(updateTime, 1000);
         }
@@ -42,22 +49,36 @@
             const urlParams = new URLSearchParams(window.location.search);
             const key = urlParams.get('ma');
             const keyInput = document.getElementById('keyInput');
+            
             if (key) {
                 keyInput.value = key;
                 animateKeyAppearance();
+                showToast('Đã tìm thấy key trong URL!', 'success');
             } else {
-                keyInput.value = 'Không tìm thấy key';
+                keyInput.value = generateRandomKey();
+                showToast('Đã tạo key ngẫu nhiên!', 'info');
             }
+        }
+
+        function generateRandomKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = 'LUX-';
+            for (let i = 0; i < 12; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+                if ((i + 1) % 4 === 0 && i !== 11) result += '-';
+            }
+            return result;
         }
 
         function animateKeyAppearance() {
             const keyInput = document.getElementById('keyInput');
-            keyInput.style.transform = 'scale(1.05)';
-            keyInput.style.boxShadow = '0 0 15px rgba(62, 207, 142, 0.6)';
-            setTimeout(() => {
-                keyInput.style.transform = 'scale(1)';
-                keyInput.style.boxShadow = '0 0 10px rgba(62, 207, 142, 0.4)';
-            }, 500);
+            keyInput.animate([
+                { transform: 'scale(0.95)', opacity: 0.5 },
+                { transform: 'scale(1.05)', opacity: 1 }
+            ], {
+                duration: 500,
+                easing: 'ease-out'
+            });
         }
 
         function copyToClipboard() {
@@ -65,21 +86,17 @@
             keyInput.select();
             document.execCommand('copy');
             
-            // Show notification instead of alert
-            const notification = document.createElement('div');
-            notification.className = 'copy-notification';
-            notification.innerHTML = `<i class="fas fa-check-circle"></i> Đã copy: ${keyInput.value}`;
-            document.body.appendChild(notification);
+            // Hiệu ứng copy
+            showToast(`Đã copy: ${keyInput.value}`, 'success');
             
-            setTimeout(() => {
-                notification.classList.add('show');
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                    setTimeout(() => {
-                        document.body.removeChild(notification);
-                    }, 300);
-                }, 2000);
-            }, 10);
+            // Hiệu ứng nhấp nháy
+            keyInput.animate([
+                { backgroundColor: 'rgba(255, 215, 0, 0.3)' },
+                { backgroundColor: 'transparent' }
+            ], {
+                duration: 800,
+                iterations: 2
+            });
         }
 
         function toggleMusic() {
@@ -88,9 +105,16 @@
             const icon = musicButton.querySelector('i');
 
             if (music.paused) {
-                music.play();
-                icon.className = 'fas fa-pause';
-                musicButton.querySelector('span').textContent = ' Tạm dừng';
+                music.play()
+                    .then(() => {
+                        icon.className = 'fas fa-pause';
+                        musicButton.querySelector('span').textContent = ' Dừng nhạc';
+                        updateMusicInfo();
+                        showToast(`Đang phát: ${currentMusic.title}`, 'music');
+                    })
+                    .catch(error => {
+                        showToast('Lỗi phát nhạc: ' + error.message, 'error');
+                    });
             } else {
                 music.pause();
                 icon.className = 'fas fa-play';
@@ -98,42 +122,95 @@
             }
         }
 
+        function updateMusicInfo() {
+            document.getElementById('musicTitle').textContent = currentMusic.title;
+            document.getElementById('musicArtist').textContent = currentMusic.artist;
+        }
+
+        function changeMusic() {
+            // Trong thực tế, bạn sẽ thêm logic để chọn bài hát khác từ YouTube
+            showToast('Tính năng chọn nhạc đang phát triển', 'info');
+        }
+
         function initVolumeControl() {
             const music = document.getElementById('backgroundMusic');
             const volumeSlider = document.getElementById('volumeSlider');
             
-            // Set initial volume
+            // Thiết lập âm lượng ban đầu
             music.volume = volumeSlider.value / 100;
             
             volumeSlider.addEventListener('input', () => {
                 music.volume = volumeSlider.value / 100;
+                localStorage.setItem('musicVolume', volumeSlider.value);
             });
+            
+            // Khôi phục âm lượng từ localStorage nếu có
+            const savedVolume = localStorage.getItem('musicVolume');
+            if (savedVolume) {
+                volumeSlider.value = savedVolume;
+                music.volume = savedVolume / 100;
+            }
         }
 
-        window.onload = function () {
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    ${type === 'success' ? '<i class="fas fa-check-circle"></i>' : 
+                     type === 'error' ? '<i class="fas fa-exclamation-circle"></i>' : 
+                     type === 'music' ? '<i class="fas fa-music"></i>' : 
+                     '<i class="fas fa-info-circle"></i>'}
+                </div>
+                <div class="toast-message">${message}</div>
+                <div class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300);
+                }, 3000);
+            }, 10);
+        }
+
+        window.onload = function() {
             updateTime();
             getQueryParam();
             initVolumeControl();
+            updateMusicInfo();
             
-            // Add animation to container on load
-            const container = document.querySelector('.container');
+            // Hiệu ứng load trang
+            document.querySelector('.container').style.opacity = '1';
+            document.querySelector('.container').style.transform = 'translateY(0)';
+            
+            // Hiển thị thông báo chào mừng
             setTimeout(() => {
-                container.style.opacity = '1';
-                container.style.transform = 'translateY(0)';
-            }, 100);
+                showToast('Chào mừng đến với Luxury Key Generator!', 'info');
+            }, 1000);
         };
     </script>
     <style>
         :root {
-            --primary-color: #3ecf8e;
-            --primary-dark: #2bb673;
-            --secondary-color: #5b6be8;
-            --dark-color: #1a1d28;
-            --light-color: #f8f9fa;
-            --gray-color: #6c757d;
-            --danger-color: #ff5b5b;
-            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
+            --gold: #D4AF37;
+            --gold-light: #FFD700;
+            --gold-dark: #996515;
+            --dark: #121212;
+            --darker: #0A0A0A;
+            --light: #F5F5F5;
+            --success: #28A745;
+            --error: #DC3545;
+            --info: #17A2B8;
+            --music: #6F42C1;
+            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --border-radius: 12px;
         }
         
         * {
@@ -143,139 +220,216 @@
         }
         
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1a1d28, #2a2f3d);
-            color: var(--light-color);
-            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            padding: 20px;
             line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
+            background-size: cover;
+            opacity: 0.15;
+            z-index: -1;
         }
         
         .container {
-            width: 90%;
-            max-width: 500px;
+            width: 100%;
+            max-width: 600px;
             padding: 2.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            box-shadow: var(--box-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(15px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(212, 175, 55, 0.2);
             text-align: center;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(30px);
             transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 65%, rgba(212, 175, 55, 0.05) 100%);
+            pointer-events: none;
+            z-index: -1;
         }
         
         .logo {
-            font-size: 2.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
             margin-bottom: 1.5rem;
-            color: var(--primary-color);
+            color: var(--gold);
             display: flex;
             justify-content: center;
             align-items: center;
+            letter-spacing: 1px;
         }
         
         .logo i {
-            margin-right: 0.5rem;
+            margin-right: 1rem;
+            color: var(--gold-light);
         }
         
         h1 {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 2rem;
             font-weight: 600;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(to right, var(--gold), var(--gold-light));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 25%;
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
         }
         
         .key-container {
-            margin: 2rem 0;
+            margin: 2.5rem 0;
+            position: relative;
         }
         
         input {
             width: 100%;
-            padding: 1rem;
+            padding: 1.2rem;
             margin-bottom: 1.5rem;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            font-size: 1rem;
-            background: rgba(0, 0, 0, 0.2);
-            color: var(--light-color);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--gold-light);
             text-align: center;
             font-weight: 500;
             transition: var(--transition);
             outline: none;
+            font-family: 'Montserrat', monospace;
+            letter-spacing: 1px;
         }
         
         input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 10px rgba(62, 207, 142, 0.4);
+            border-color: var(--gold);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
         }
         
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: var(--primary-color);
-            color: white;
-            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--darker);
+            padding: 1rem 2rem;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--border-radius);
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             margin: 0.5rem;
-            box-shadow: 0 4px 15px rgba(62, 207, 142, 0.3);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            position: relative;
+            overflow: hidden;
+            min-width: 180px;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
         }
         
         .btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(62, 207, 142, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn i {
-            margin-right: 0.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
         }
         
-        .btn-danger {
-            background: var(--danger-color);
-            box-shadow: 0 4px 15px rgba(255, 91, 91, 0.3);
+        .btn-music {
+            background: linear-gradient(135deg, var(--music), #5A2D8A);
+            color: white;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
         }
         
-        .btn-danger:hover {
-            background: #e04a4a;
-            box-shadow: 0 6px 20px rgba(255, 91, 91, 0.4);
+        .btn-music:hover {
+            box-shadow: 0 8px 25px rgba(111, 66, 193, 0.5);
         }
         
         .date-display {
-            margin: 1.5rem 0;
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.8);
+            margin: 2rem 0;
+            font-size: 1.2rem;
+            color: rgba(245, 245, 245, 0.8);
         }
         
         .date-display strong {
-            color: var(--primary-color);
+            color: var(--gold-light);
             font-weight: 500;
         }
         
+        .luxury-text {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: var(--gold);
+            letter-spacing: 1px;
+        }
+        
         .footer {
-            margin-top: 2rem;
+            margin-top: 2.5rem;
             font-size: 0.9rem;
-            color: var(--gray-color);
+            color: rgba(245, 245, 245, 0.6);
         }
         
         .footer a {
-            color: var(--primary-color);
+            color: var(--gold);
             text-decoration: none;
             transition: var(--transition);
+            font-weight: 500;
         }
         
         .footer a:hover {
+            color: var(--gold-light);
             text-decoration: underline;
         }
         
@@ -283,74 +437,166 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
         }
         
         .volume-control {
             display: flex;
             align-items: center;
-            margin-top: 1rem;
+            margin: 1.5rem 0;
             width: 100%;
+            padding: 0 1rem;
         }
         
         .volume-control i {
-            margin-right: 0.5rem;
-            color: var(--primary-color);
+            margin: 0 0.8rem;
+            color: var(--gold);
+            font-size: 1.1rem;
         }
         
         .volume-control input[type="range"] {
             flex-grow: 1;
-            height: 5px;
-            margin: 0 0.5rem;
+            height: 6px;
             -webkit-appearance: none;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(245, 245, 245, 0.1);
             border-radius: 5px;
             outline: none;
+            cursor: pointer;
         }
         
         .volume-control input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 15px;
-            height: 15px;
-            background: var(--primary-color);
+            width: 18px;
+            height: 18px;
+            background: var(--gold);
             border-radius: 50%;
             cursor: pointer;
+            border: 2px solid var(--darker);
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
         
-        .copy-notification {
+        .music-info {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--border-radius);
+            border-left: 3px solid var(--gold);
+        }
+        
+        .music-info p {
+            margin: 0.3rem 0;
+            font-size: 0.95rem;
+        }
+        
+        .music-info .title {
+            font-weight: 600;
+            color: var(--gold-light);
+        }
+        
+        .music-info .artist {
+            color: rgba(245, 245, 245, 0.7);
+            font-style: italic;
+        }
+        
+        #toastContainer {
             position: fixed;
-            bottom: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary-color);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: var(--box-shadow);
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        
+        .toast {
+            min-width: 300px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            background: var(--dark);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
             display: flex;
             align-items: center;
             opacity: 0;
-            transition: all 0.3s ease;
-            z-index: 1000;
+            transform: translateX(100%);
+            transition: all 0.4s ease;
+            border-left: 4px solid var(--gold);
         }
         
-        .copy-notification.show {
-            bottom: 20px;
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            border-left-color: var(--success);
+        }
+        
+        .toast.error {
+            border-left-color: var(--error);
+        }
+        
+        .toast.info {
+            border-left-color: var(--info);
+        }
+        
+        .toast.music {
+            border-left-color: var(--music);
+        }
+        
+        .toast-icon {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .toast-icon i {
+            color: inherit;
+        }
+        
+        .toast.success .toast-icon {
+            color: var(--success);
+        }
+        
+        .toast.error .toast-icon {
+            color: var(--error);
+        }
+        
+        .toast.info .toast-icon {
+            color: var(--info);
+        }
+        
+        .toast.music .toast-icon {
+            color: var(--music);
+        }
+        
+        .toast-message {
+            flex-grow: 1;
+            font-size: 0.95rem;
+        }
+        
+        .toast-close {
+            margin-left: 1rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+        
+        .toast-close:hover {
             opacity: 1;
         }
         
-        .copy-notification i {
-            margin-right: 0.5rem;
-        }
-        
-        @media (max-width: 576px) {
+        @media (max-width: 768px) {
             .container {
-                padding: 1.5rem;
-                width: 95%;
+                padding: 1.8rem;
+            }
+            
+            .logo {
+                font-size: 2.2rem;
             }
             
             h1 {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
             }
             
             .controls {
@@ -359,43 +605,70 @@
             
             .btn {
                 width: 100%;
-                margin: 0.3rem 0;
+                margin: 0.5rem 0;
             }
+            
+            .toast {
+                min-width: 250px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Animation */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
         }
     </style>
 </head>
 <body>
     <audio id="backgroundMusic" loop>
-        <source src="https://rr4---sn-npoeens7.googlevideo.com/videoplayback?expire=1738570417&ei=USagZ4Vk6_nE3w-x7KCJBg&ip=172.64.236.154&id=o-AAimGCMhLlnkFgQqbULLm4c5rLQiwpJXAB9aLLiMq4KH&itag=140&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&bui=AY2Et-NhXWJuEA_aAiv4s4CMjS0GNJ5kVy9qweCNCESmMcFo7gwC7u2n02jFCTAEYi17h2MNMEdZl1cQ&spc=9kzgDe0cTB4wLXbrqCENjNXF39FeMaXArlp1tUthP0Mj7BFN6PRwObzbGw&vprv=1&svpuc=1&mime=audio%2Fmp4&ns=ciOnzHLpGKSoPvsrdclhYhoQ&rqh=1&gir=yes&clen=12915678&dur=798.000&lmt=1726163663589433&keepalive=yes&lmw=1&fexp=24350590,24350737,24350827,24350933,24350961,24350977,24350999,24351028,24351059,24351082,51326932,51371294&c=TVHTML5&sefc=1&txp=5432434&n=oOVy0aSPT2m58w&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AJfQdSswRAIgdqeR7ocPNLzfZ8ZpZkVJl9uhPiHnTmW-oIiDy0YosScCIGMbR3y4GUPaOW9VkEYfsnYGZDMJ1_1ub20amE3pVmcd&title=Cari+Pokemon+-+Mit+x+AM+Remix+%E2%9C%AA+Mochi+Entertainment+%7C%7C+Nh%E1%BA%A1c+Hot+Tiktok+Hay+Nh%E1%BA%A5t+2023%23mochi&rm=sn-h5q6l7l&rrc=104,80&req_id=442fafdb2aeca3ee&ipbypass=yes&redirect_counter=2&cm2rm=sn-8qj-2m0e7s&cms_redirect=yes&cmsv=e&met=1738548821,&mh=0l&mip=2001:ee0:4e1d:40f0:9918:bf84:9f64:6e22&mm=29&mn=sn-npoeens7&ms=rdu&mt=1738548536&mv=m&mvi=4&pl=48&rms=rdu,au&lsparams=ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=AGluJ3MwRgIhAPO94cqTh07m1khvJ4OP-lmnxEMqYdMS4DdevPGj-IEbAiEAmoIOxCicTNa-4Z5bebL0gq_d-TwAiwySZjFQUB5sSu8%3D" type="audio/mpeg">
-        Your browser does not support the audio element.
+        <!-- Thay thế bằng link nhạc YouTube thực tế -->
+        <source src="https://www.youtube.com/watch?v=YPen1KRa9g4" type="audio/mpeg">
+        Trình duyệt của bạn không hỗ trợ phát nhạc.
     </audio>
 
+    <div id="toastContainer"></div>
+
     <div class="container">
-        <div class="logo">
+        <div class="logo floating">
             <i class="fas fa-key"></i>
-            <span>Key Generator</span>
+            <span>LUXURY KEY</span>
         </div>
         
-        <h1>Key Ngày Hôm Nay</h1>
+        <h1>TRÌNH TẠO KEY CAO CẤP</h1>
         
         <div class="key-container">
             <input type="text" id="keyInput" readonly>
             
-            <div class="controls">
-                <button class="btn" onclick="copyToClipboard()">
-                    <i class="fas fa-copy"></i>
-                    <span>Sao chép</span>
-                </button>
-                <button id="musicButton" class="btn btn-danger" onclick="toggleMusic()">
-                    <i class="fas fa-play"></i>
-                    <span>Phát nhạc</span>
-                </button>
+            <div class="music-info">
+                <p class="title" id="musicTitle"></p>
+                <p class="artist" id="musicArtist"></p>
             </div>
             
             <div class="volume-control">
-                <i class="fas fa-volume-up"></i>
-                <input type="range" id="volumeSlider" min="0" max="100" value="50">
                 <i class="fas fa-volume-down"></i>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                <i class="fas fa-volume-up"></i>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" onclick="copyToClipboard()">
+                    <i class="fas fa-copy"></i>
+                    <span>Sao chép Key</span>
+                </button>
+                <button id="musicButton" class="btn btn-music" onclick="toggleMusic()">
+                    <i class="fas fa-play"></i>
+                    <span>Phát nhạc</span>
+                </button>
             </div>
         </div>
         
@@ -403,7 +676,7 @@
         
         <div class="footer">
             <p>
-                <b>Copyright © <span id="year"></span> 
+                <b>© <span id="year"></span> Bản quyền thuộc về 
                 <a href="https://zalo.me/0334063029">NVL MEDIA</a> | 
                 Thời gian: <span id="clock"></span>
                 </b>
@@ -412,8 +685,25 @@
     </div>
     
     <script>
-        // Set current year in footer
+        // Hiển thị năm hiện tại
         document.getElementById('year').textContent = new Date().getFullYear();
+        
+        // Thêm hiệu ứng khi di chuột vào container
+        const container = document.querySelector('.container');
+        container.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            container.style.transform = `
+                translateY(0)
+                rotateX(${(y - 0.5) * 2}deg)
+                rotateY(${(x - 0.5) * -2}deg)
+            `;
+        });
+        
+        container.addEventListener('mouseleave', () => {
+            container.style.transform = 'translateY(0) rotateX(0) rotateY(0)';
+        });
     </script>
 </body>
 </html>
